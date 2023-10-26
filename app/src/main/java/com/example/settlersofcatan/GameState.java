@@ -19,7 +19,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
     final int ROAD_BUILDER = 2;
     final int YEAR_OF_PLENTY = 3;
     final int VICTORY_POINT = 4;
-
+    //TODO add player colors
     //player VP Counts
     int player1VP;
     int player2VP;
@@ -84,7 +84,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
     Hashtable<Pair, Pair> player4Roads;
 
     /**
-     * base constructor
+     * base constructor, initializes a new GameState for settlersofcatan
      */
     public GameState() {
         //initialize basic variables
@@ -142,6 +142,56 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      */
     public GameState(GameState gameState) {
 
+        this.player1VP = gameState.player1VP;
+        this.player2VP = gameState.player2VP;
+        this.player3VP = gameState.player3VP;
+        this.player4VP = gameState.player4VP;
+        this.player1KC = gameState.player1KC;
+        this.player2KC = gameState.player2KC;
+        this.player3KC = gameState.player3KC;
+        this.player4KC = gameState.player4KC;
+        this.player1RC = gameState.player1RC;
+        this.player2RC = gameState.player2RC;
+        this.player3RC = gameState.player3RC;
+        this.player4RC = gameState.player4RC;
+        this.player1Ore = gameState.player1Ore;
+        this.player2Ore = gameState.player2Ore;
+        this.player3Ore = gameState.player3Ore;
+        this.player4Ore = gameState.player4Ore;
+        this.player1Wheat = gameState.player1Wheat;
+        this.player2Wheat = gameState.player2Wheat;
+        this.player3Wheat = gameState.player3Wheat;
+        this.player4Wheat = gameState.player4Wheat;
+        this.player1Brick = gameState.player1Brick;
+        this.player2Brick = gameState.player2Brick;
+        this.player3Brick = gameState.player3Brick;
+        this.player4Brick = gameState.player4Brick;
+        this.player1Wood = gameState.player1Wood;
+        this.player2Wood = gameState.player2Wood;
+        this.player3Wood = gameState.player3Wood;
+        this.player4Wood = gameState.player4Wood;
+        this.player1Sheep = gameState.player1Sheep;
+        this.player2Sheep = gameState.player2Sheep;
+        this.player3Sheep = gameState.player3Sheep;
+        this.player4Sheep = gameState.player4Sheep;
+        //TODO make this a real deep copy I just don't feel like it rn
+        player1DC = new ArrayList<Integer>();
+        player2DC = new ArrayList<Integer>();
+        player3DC = new ArrayList<Integer>();
+        player4DC = new ArrayList<Integer>();
+        player1Infs = new Hashtable<Pair, String>();
+        player2Infs = new Hashtable<Pair, String>();
+        player3Infs = new Hashtable<Pair, String>();
+        player4Infs = new Hashtable<Pair, String>();
+        player1Roads = new Hashtable<Pair, Pair>();
+        player2Roads = new Hashtable<Pair, Pair>();
+        player3Roads = new Hashtable<Pair, Pair>();
+        player4Roads = new Hashtable<Pair, Pair>();
+    }
+
+    public String toString() {
+        //TODO implement this
+        return "";
     }
 
 }
