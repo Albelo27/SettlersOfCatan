@@ -13,6 +13,8 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
     private int lastRoll;
     //can the player who's turn it is roll the dice
     private boolean canRoll;
+    //can the player who's turn it is move the robber
+    private boolean knightPlayed;
     //String for the gameState toString() method
     private String output;
     //int that represents the robbers position o tiles 0-18
@@ -824,8 +826,13 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      */
     private boolean moveRobber(int playerID, int newPos) {
         if (playerID == playerUp) {
-            setRobberPos(newPos);
-            return true;
+            if (lastRoll == 7 || knightPlayed) {
+                setRobberPos(newPos);
+                knightPlayed = false;
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
