@@ -263,7 +263,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      * @param playerId the player who sent the rollDice action call
      * @return true if the player rolled the dice and update the gameState, false if the player rolled out of turn
      */
-    private boolean rollDice(int playerId) {
+    public boolean rollDice(int playerId) {
         if (playerId == playerUp && canRoll) {
             //roll two dice to attempt to mimic the real odds of rolling two dice, eg. 7 is more common than 11
             lastRoll = (int)(Math.ceil(Math.random() * 6) + Math.ceil(Math.random()*6));
@@ -278,7 +278,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      * @param playerID The Player building the road
      * @return true if the road got built, false if the player was out of turn or is out of resources.
      */
-    private boolean buildRoad(int playerID) {
+    public boolean buildRoad(int playerID) {
         if (playerID == playerUp) {
             switch (playerID) {
                 case 0:
@@ -325,7 +325,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      * @param playerID the player building the settlement
      * @return true if the build was legal, false if the player does not have the resources or played out of turn
      */
-    private boolean buildSettlement(int playerID) {
+    public boolean buildSettlement(int playerID) {
         if (playerID == playerUp) {
             switch (playerID) {
                 case 0:
@@ -380,7 +380,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      * @param playerID The player building the city
      * @return true if the city is built, false if the player played out of turn or does not have the needed materials
      */
-    private boolean upgradeToCity(int playerID) {
+    public boolean upgradeToCity(int playerID) {
         if (playerID == playerUp) {
             //VP count only increases by one because cities replace
             // settlements already on the board so net score increase is only 1
@@ -433,7 +433,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      * @param playerID the player buying the development cards
      * @return true if the card was purchased, false if the player does not have the required materials or played out of turn
      */
-    private boolean purchaseDC(int playerID) {
+    public boolean purchaseDC(int playerID) {
         //player is awarded a random development card using a random int between 0 and 4
         if (playerID == playerUp) {
             switch (playerID) {
@@ -504,11 +504,11 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      * Plays a development card from a players hand
      * @param playerID the player who played the card
      * @param cardID the card that was played
-     * @param resourceID the resource thet was selected (only used for the Monopoly and Year of Plenty cards)
+     * @param resourceID the resource that was selected (only used for the Monopoly and Year of Plenty cards)
      * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
      */
     //TODO development card interactions are going to need GameActions later
-    private boolean playDC(int playerID, int cardID, int resourceID) {
+    public boolean playDC(int playerID, int cardID, int resourceID) {
         if (playerID == playerUp && cardID <= 4) {
             switch (playerID) {
                 case 0://player 1
@@ -824,7 +824,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      * @param newPos the new position at which to set the robber
      * @return true if the robber was moved, false if the player moved out of turn
      */
-    private boolean moveRobber(int playerID, int newPos) {
+    public boolean moveRobber(int playerID, int newPos) {
         if (playerID == playerUp) {
             if (lastRoll == 7 || knightPlayed) {
                 setRobberPos(newPos);
@@ -1120,4 +1120,15 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
     public void setPlayer4Wood(int player4Wood) {
         this.player4Wood = player4Wood;
     }
+
+    //My get functions for onCLick method messages
+
+    public int getLastRoll(){
+        return this.lastRoll;
+    }
+    public int getCardID(){
+        int max = player1DC.size();
+        return player1DC.get(max);
+    }
+
 }
