@@ -10,6 +10,11 @@ public class Pair<T, K> {
         pair2 = p2;
     }
 
+    public Pair(Pair<T, K> pair) {
+        this.pair1 = pair.getKey();
+        this.pair2 = pair.getValue();
+    }
+
     public T getKey() {
         return pair1;
     }
