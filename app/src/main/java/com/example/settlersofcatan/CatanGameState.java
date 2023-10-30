@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.example.util.Pair;
 
 
-public class GameState extends com.example.game.GameFramework.infoMessage.GameState {
+public class CatanGameState extends com.example.game.GameFramework.infoMessage.GameState {
 
     //records the current player
     private int playerUp;
@@ -105,7 +105,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
     /**
      * base constructor, initializes a new GameState for settlersofcatan
      */
-    public GameState() {
+    public CatanGameState() {
         //initialize basic variables
         canRoll = true;
         player1VP = 0;
@@ -160,7 +160,7 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
      *
      * @param gameState gameState that should be copied
      */
-    public GameState(GameState gameState) {
+    public CatanGameState(CatanGameState gameState) {
         this.canRoll = gameState.canRoll;
         this.player1VP = gameState.player1VP;
         this.player2VP = gameState.player2VP;
@@ -841,6 +841,10 @@ public class GameState extends com.example.game.GameFramework.infoMessage.GameSt
     /*
     getters and setters for gameState variables
      */
+
+    public int getPlayerUp() {
+        return playerUp;
+    }
 
     public int getRobberPos() {
         return robberPos;

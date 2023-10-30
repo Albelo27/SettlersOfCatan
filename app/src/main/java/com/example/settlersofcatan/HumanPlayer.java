@@ -17,10 +17,10 @@ public class HumanPlayer extends GameHumanPlayer implements View.OnClickListener
     //editText for output purposes
     private EditText textEdit;
     //instances for the GameState assignment
-    private GameState firstInstance;
-    private GameState secondInstance;
-    private GameState thirdInstance;
-    private GameState fourthInstance;
+    private CatanGameState firstInstance;
+    private CatanGameState secondInstance;
+    private CatanGameState thirdInstance;
+    private CatanGameState fourthInstance;
 
     /**
      * Constructor for the HumanPlayer class, creates a new HumanPlayer which extends GameHumanPlayer
@@ -72,11 +72,11 @@ public class HumanPlayer extends GameHumanPlayer implements View.OnClickListener
 
         //A new instance of the game state class is created using the default
         //constructor and assigned to a variable named firstInstance
-        firstInstance = new GameState();
+        firstInstance = new CatanGameState();
 
         //Deep copy of firstInstance from the perspective of player one. Assign this copy to a variable
         //named secondInstance
-        secondInstance = new GameState(firstInstance);
+        secondInstance = new CatanGameState(firstInstance);
 
         //Using firstInstance, call each method in the game state class at least
         //once. In each case it should be making a legal move in the game.
@@ -149,12 +149,12 @@ public class HumanPlayer extends GameHumanPlayer implements View.OnClickListener
 
         //Create a new instance of the game state class using the default constructor.
         //Assign this value to a variable named thirdInstance.
-        thirdInstance = new GameState();
+        thirdInstance = new CatanGameState();
 
         //Use your deep copy constructor to make a deep copy of thirdInstance
         //from the perspective of player one. Assign this copy to a variable
         //named fourthInstance
-        fourthInstance = new GameState(thirdInstance);
+        fourthInstance = new CatanGameState(thirdInstance);
 
         //Call the toString() method on secondInstance and fourthInstance.
         //The two strings should be identical. Your code should verify this.

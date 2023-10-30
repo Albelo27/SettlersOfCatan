@@ -35,6 +35,7 @@ public class MainActivity extends GameMainActivity {
 
     @Override
     public LocalGame createLocalGame(GameState gameState) {
+        CatanLocalGame localGame = new CatanLocalGame(gameState);
         return null;
     }
 
