@@ -9,23 +9,31 @@ public class CatanLocalGame extends LocalGame {
 
     CatanGameState gameState;
 
+    /**
+     * Creates a new LocalGame
+     */
     public CatanLocalGame() {
-
-    }
+        gameState = new CatanGameState();
+;    }
 
     @Override
     protected void sendUpdatedStateTo(GamePlayer p) {
-
+        //TODO implement this for beta release
     }
 
     @Override
     protected boolean canMove(int playerIdx) {
-        return false;
+       if (playerIdx == gameState.getPlayerUp()) {
+            return true;
+       } else {
+           return false;
+       }
     }
 
     @Override
     protected String checkIfGameOver() {
-        return null;
+        //gameState can not reach a point where the game is 'over'
+        return "lol";
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.example.util.Pair;
 
 
 public class CatanGameState extends com.example.game.GameFramework.infoMessage.GameState {
-
+    //TODO fix this godawful data structure that I made
     //records the current player
     private int playerUp;
     //records the most recent roll made

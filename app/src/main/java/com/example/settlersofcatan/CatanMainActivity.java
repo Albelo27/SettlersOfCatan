@@ -1,7 +1,5 @@
 package com.example.settlersofcatan;
 
-import android.os.Bundle;
-
 import com.example.game.GameFramework.GameMainActivity;
 import com.example.game.GameFramework.LocalGame;
 import com.example.game.GameFramework.gameConfiguration.GameConfig;
@@ -11,10 +9,15 @@ import com.example.game.GameFramework.players.GamePlayer;
 
 import java.util.ArrayList;
 
-public class MainActivity extends GameMainActivity {
+public class CatanMainActivity extends GameMainActivity {
 
     //same port number as lab project so that ik this is not causing an error
     private static final int PORT_NUMBER = 2278;
+
+    /**
+     * Create a default configuration for our game
+     * @return a GameConfig object that represents the default configuration that you specify
+     */
     @Override
     public GameConfig createDefaultConfig() {
         //list of allowed player types
@@ -22,7 +25,7 @@ public class MainActivity extends GameMainActivity {
         //local human player
         playerTypes.add(new GamePlayerType("Local Human Player") {
             public GamePlayer createPlayer(String name) {
-                return new HumanPlayer(name);
+                return new CatanHumanPlayer(name);
             }});
 
         //create a default gameConfig
@@ -35,11 +38,6 @@ public class MainActivity extends GameMainActivity {
 
     @Override
     public LocalGame createLocalGame(GameState gameState) {
-        CatanLocalGame localGame = new CatanLocalGame(gameState);
-        return null;
-    }
-
-    public void start(GamePlayer[] players) {
-
+        return new CatanLocalGame();
     }
 }

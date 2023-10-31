@@ -8,7 +8,7 @@ import com.example.game.GameFramework.GameMainActivity;
 import com.example.game.GameFramework.infoMessage.GameInfo;
 import com.example.game.GameFramework.players.GameHumanPlayer;
 
-public class HumanPlayer extends GameHumanPlayer implements View.OnClickListener {
+public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickListener {
 
     //current android activity for GUI integration etc.
     private GameMainActivity theActivity;
@@ -27,7 +27,7 @@ public class HumanPlayer extends GameHumanPlayer implements View.OnClickListener
      *
      * @param name The name of the human player to be created
      */
-    public HumanPlayer(String name) {
+    public CatanHumanPlayer(String name) {
         super(name);
     }
 
@@ -90,7 +90,7 @@ public class HumanPlayer extends GameHumanPlayer implements View.OnClickListener
 
         //rollDice
         firstInstance.rollDice(1);
-        textEdit.append("Player 1 rolled a"+ firstInstance.getLastRoll()+"\n");
+        textEdit.append("Player 1 rolled a "+ firstInstance.getLastRoll()+"\n");
 
         //buildRoad
         firstInstance.buildRoad(1);
