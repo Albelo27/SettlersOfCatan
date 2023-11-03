@@ -584,9 +584,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      */
     public boolean moveRobber(int playerID, int newPos) {
         if(playerID != playerUp) return false;
-        if(lastRoll != 7 || !knightPlayed) return false;
         setRobberPos(newPos);
-        knightPlayed = false;
         return true;
     }
 
