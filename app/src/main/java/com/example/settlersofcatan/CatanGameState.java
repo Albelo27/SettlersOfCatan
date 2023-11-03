@@ -10,25 +10,13 @@ import com.example.util.Pair;
  * @author Anthony Albelo
  * @author Eric Su
  * @author Connor Santa Monica
- * @author Reiss Oliveross
+ * @author Reiss Oliveros
  * @author Ryley vargas
  *
  * @Version October 30th 2023
  */
 public class CatanGameState extends com.example.game.GameFramework.infoMessage.GameState {
     //TODO fix this godawful data structure that I made
-    //records the current player
-    private int playerUp;
-    //records the most recent roll made
-    private int lastRoll;
-    //can the player who's turn it is roll the dice
-    private boolean canRoll;
-    //can the player who's turn it is move the robber
-    private boolean knightPlayed;
-    //String for the gameState toString() method
-    private String output;
-    //int that represents the robbers position o tiles 0-18
-    private int robberPos;
     /*
     Development Card constants
        Players will have an array of Integers that represent their Development cards
@@ -38,58 +26,49 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     final int ROAD_BUILDER = 2;
     final int YEAR_OF_PLENTY = 3;
     final int VICTORY_POINT = 4;
-    //resource constants, used to inform GameSate and PlayerState when passing messages about which resources should be updated
+    /*resource constants
+    used to inform GameSate and PlayerState when passing messages about which resources should be updated
+     */
     final int ORE = 0;
     final int WHEAT = 1;
     final int BRICK = 2;
     final int SHEEP = 3;
     final int WOOD = 4;
+    //records the current player
+    private int playerUp;
+    //records the most recent roll made
+    private int lastRoll;
+    //can the player who's turn it is roll the dice
+    private boolean canRoll;
+    //String for the gameState toString() method
+    //DEPRECATED
+    private String output;
+    //int that represents the robbers position o tiles 0-18
+    private int robberPos;
+    /*The board values array should hold two values
+        boardValues[X][0] should be the number on which that tile produces resources
+        and boardVallues[X][1] should be which resource is produced
+     */
+    int[][] boardValues = new int[19][2];
     //player color values
-    final float player1Red = 0xc12a43;
-    final float player2Blue = 0x2a3ec1;
-    final float player3Orange = 0xc17b2a;
-    final float player4Cream = 0xe5c8a7;
+    final float[] playerColors = {0xc12a43, 0x2a3ec1, 0xc17b2a, 0xe5c8a7};
     //player VP Counts
-    int player1VP;
-    int player2VP;
-    int player3VP;
-    int player4VP;
+    int[] playerVPs = new int[4];
     //playerKnightCount
-    int player1KC;
-    int player2KC;
-    int player3KC;
-    int player4KC;
+    int[] playerKCs = new int[4];
     //player road count
-    int player1RC;
-    int player2RC;
-    int player3RC;
-    int player4RC;
+    int[] playerRCs = new int[4];
     //player resource values
     //ore
-    int player1Ore;
-    int player2Ore;
-    int player3Ore;
-    int player4Ore;
+    int[] playerOre = new int[4];
     //wheat
-    int player1Wheat;
-    int player2Wheat;
-    int player3Wheat;
-    int player4Wheat;
+    int[] playerWheat = new int[4];
     //brick
-    int player1Brick;
-    int player2Brick;
-    int player3Brick;
-    int player4Brick;
+    int[] playerBrick = new int[4];
     //sheep
-    int player1Sheep;
-    int player2Sheep;
-    int player3Sheep ;
-    int player4Sheep;
+    int[] playerSheep = new int[4];
     //wood
-    int player1Wood;
-    int player2Wood;
-    int player3Wood;
-    int player4Wood;
+    int[] playerWood = new int[4];
 
     //player development cards
     ArrayList<Integer> player1DC;
@@ -117,39 +96,21 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      */
     public CatanGameState() {
         //initialize basic variables
+        playerUp = 0;
+        lastRoll = 7;//most common roll, placeholder for pre-setup
         canRoll = true;
-        player1VP = 0;
-        player2VP = 0;
-        player3VP = 0;
-        player4VP = 0;
-        player1KC = 0;
-        player2KC = 0;
-        player3KC = 0;
-        player4KC = 0;
-        player1RC = 0;
-        player2RC = 0;
-        player3RC = 0;
-        player4RC = 0;
-        player1Ore = 0;
-        player2Ore = 0;
-        player3Ore = 0;
-        player4Ore = 0;
-        player1Wheat = 0;
-        player2Wheat = 0;
-        player3Wheat = 0;
-        player4Wheat = 0;
-        player1Brick = 0;
-        player2Brick = 0;
-        player3Brick = 0;
-        player4Brick = 0;
-        player1Wood = 0;
-        player2Wood = 0;
-        player3Wood = 0;
-        player4Wood = 0;
-        player1Sheep = 0;
-        player2Sheep = 0;
-        player3Sheep = 0;
-        player4Sheep = 0;
+        output = "test";
+        robberPos = -1;//TODO should be set to the same position as the desert
+        for (int k = 0; k < 4; k++) {//all of these arrays are 4 in length
+            playerVPs[k] = 2;//players start with two settlements on the board
+            playerKCs[k] = 0;
+            playerRCs[k] = 1;//players start with roads that are one segment long
+            playerOre[k] = 0;
+            playerWheat[k] = 0;
+            playerBrick[k] = 0;
+            playerSheep[k] = 0;
+            playerWood[k] = 0;
+        }
         //initialize complex variables
         player1DC = new ArrayList<Integer>();
         player2DC = new ArrayList<Integer>();
@@ -168,81 +129,69 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     /**
      * Creates a deep copy of the game State you pass into the function
      *
-     * @param gameState gameState that should be copied
+     * @param copy gameState that should be copied
      */
-    public CatanGameState(CatanGameState gameState) {
-        this.canRoll = gameState.canRoll;
-        this.player1VP = gameState.player1VP;
-        this.player2VP = gameState.player2VP;
-        this.player3VP = gameState.player3VP;
-        this.player4VP = gameState.player4VP;
-        this.player1KC = gameState.player1KC;
-        this.player2KC = gameState.player2KC;
-        this.player3KC = gameState.player3KC;
-        this.player4KC = gameState.player4KC;
-        this.player1RC = gameState.player1RC;
-        this.player2RC = gameState.player2RC;
-        this.player3RC = gameState.player3RC;
-        this.player4RC = gameState.player4RC;
-        this.player1Ore = gameState.player1Ore;
-        this.player2Ore = gameState.player2Ore;
-        this.player3Ore = gameState.player3Ore;
-        this.player4Ore = gameState.player4Ore;
-        this.player1Wheat = gameState.player1Wheat;
-        this.player2Wheat = gameState.player2Wheat;
-        this.player3Wheat = gameState.player3Wheat;
-        this.player4Wheat = gameState.player4Wheat;
-        this.player1Brick = gameState.player1Brick;
-        this.player2Brick = gameState.player2Brick;
-        this.player3Brick = gameState.player3Brick;
-        this.player4Brick = gameState.player4Brick;
-        this.player1Wood = gameState.player1Wood;
-        this.player2Wood = gameState.player2Wood;
-        this.player3Wood = gameState.player3Wood;
-        this.player4Wood = gameState.player4Wood;
-        this.player1Sheep = gameState.player1Sheep;
-        this.player2Sheep = gameState.player2Sheep;
-        this.player3Sheep = gameState.player3Sheep;
-        this.player4Sheep = gameState.player4Sheep;
-        player1DC = new ArrayList<Integer>();
-        this.player1DC.addAll(gameState.player1DC);
-        player2DC = new ArrayList<Integer>();
-        this.player2DC.addAll(gameState.player2DC);
-        player3DC = new ArrayList<Integer>();
-        this.player3DC.addAll(gameState.player3DC);
-        player4DC = new ArrayList<Integer>();
-        this.player4DC.addAll(gameState.player4DC);
-        player1Infs = new Hashtable<Pair, String>();
-        for (Pair key: gameState.player1Infs.keySet()) {
-            this.player1Infs.put(new Pair(key), new String(gameState.player1Infs.get(key)));
+    public CatanGameState(CatanGameState copy) {
+        //copy basic variables
+        this.playerUp = copy.playerUp;
+        this.lastRoll = copy.lastRoll;
+        this.canRoll = copy.canRoll;
+        this.robberPos = copy.robberPos;
+        for (int k = 0; k < 4; k++) {//4-long arrays
+            this.playerVPs[k] = copy.playerVPs[k];
+            this.playerKCs[k] = copy.playerKCs[k];
+            this.playerRCs[k] = copy.playerRCs[k];
+            this.playerOre[k] = copy.playerOre[k];
+            this.playerWheat[k] = copy.playerWheat[k];
+            this.playerBrick[k] = copy.playerBrick[k];
+            this.playerSheep[k] = copy.playerSheep[k];
+            this.playerWood[k] = copy.playerWood[k];
         }
-        player2Infs = new Hashtable<Pair, String>();
-        for (Pair key: gameState.player2Infs.keySet()) {
-            this.player2Infs.put(new Pair(key), new String(gameState.player2Infs.get(key)));
+        for (int a = 0; a < boardValues.length; a++) {//copy board layout
+            for (int y = 0; y < boardValues[0].length; y++) {
+                this.boardValues[a][y] = copy.boardValues[a][y];
+            }
         }
-        player3Infs = new Hashtable<Pair, String>();
-        for (Pair key: gameState.player3Infs.keySet()) {
-            this.player3Infs.put(new Pair(key), new String(gameState.player3Infs.get(key)));
+        //copy complex variables
+        this.player1DC = new ArrayList<Integer>();
+        this.player1DC.addAll(copy.player1DC);
+        this.player2DC = new ArrayList<Integer>();
+        this.player2DC.addAll(copy.player2DC);
+        this.player3DC = new ArrayList<Integer>();
+        this.player3DC.addAll(copy.player3DC);
+        this.player4DC = new ArrayList<Integer>();
+        this.player4DC.addAll(copy.player4DC);
+        this.player1Infs = new Hashtable<Pair, String>();
+        for (Pair key: copy.player1Infs.keySet()) {
+            this.player1Infs.put(new Pair(key), new String(copy.player1Infs.get(key)));
         }
-        player4Infs = new Hashtable<Pair, String>();
-        for (Pair key: gameState.player4Infs.keySet()) {
-            this.player4Infs.put(new Pair(key), new String(gameState.player4Infs.get(key)));
+        this.player2Infs = new Hashtable<Pair, String>();
+        for (Pair key: copy.player2Infs.keySet()) {
+            this.player2Infs.put(new Pair(key), new String(copy.player2Infs.get(key)));
         }
-        player1Roads = new Hashtable<Pair, Pair>();
-        for (Pair key : gameState.player1Roads.keySet()) {
-            this.player1Roads.put(new Pair(key), new Pair(gameState.player1Roads.get(key)));
+        this.player3Infs = new Hashtable<Pair, String>();
+        for (Pair key: copy.player3Infs.keySet()) {
+            this.player3Infs.put(new Pair(key), new String(copy.player3Infs.get(key)));
         }
-        player2Roads = new Hashtable<Pair, Pair>();
-        for (Pair key : gameState.player2Roads.keySet()) {
-            this.player2Roads.put(new Pair(key), new Pair(gameState.player2Roads.get(key)));
+        this.player4Infs = new Hashtable<Pair, String>();
+        for (Pair key: copy.player4Infs.keySet()) {
+            this.player4Infs.put(new Pair(key), new String(copy.player4Infs.get(key)));
         }
-        player3Roads = new Hashtable<Pair, Pair>();
-        for (Pair key : gameState.player3Roads.keySet()) {
-            this.player3Roads.put(new Pair(key), new Pair(gameState.player3Roads.get(key)));
+        this.player1Roads = new Hashtable<Pair, Pair>();
+        for (Pair key : copy.player1Roads.keySet()) {
+            this.player1Roads.put(new Pair(key), new Pair(copy.player1Roads.get(key)));
         }
-        player4Roads = new Hashtable<Pair, Pair>();
-        for (Pair key : gameState.player4Roads.keySet()) {
-            this.player4Roads.put(new Pair(key), new Pair(gameState.player4Roads.get(key)));
+        this.player2Roads = new Hashtable<Pair, Pair>();
+        for (Pair key : copy.player2Roads.keySet()) {
+            this.player2Roads.put(new Pair(key), new Pair(copy.player2Roads.get(key)));
+        }
+        this.player3Roads = new Hashtable<Pair, Pair>();
+        for (Pair key : copy.player3Roads.keySet()) {
+            this.player3Roads.put(new Pair(key), new Pair(copy.player3Roads.get(key)));
+        }
+        this.player4Roads = new Hashtable<Pair, Pair>();
+        for (Pair key : copy.player4Roads.keySet()) {
+            this.player4Roads.put(new Pair(key), new Pair(copy.player4Roads.get(key)));
         }
     }
 
@@ -253,19 +202,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      */
     @Override
     public String toString() {
-        output = "";
-        output += "playerUp: " + playerUp + " ";
-        output += "lastRoll: " + lastRoll + " ";
-        output += "player1VP: " + player1VP + " ";
-        output += "player2VP: " + player2VP + " ";
-        output += "player3VP: " + player3VP + " ";
-        output += "player4VP: " + player4VP + " ";
-        output += "player1KC: " + player1KC + " ";
-        output += "player2KC: " + player2KC + " ";
-        output += "player3KC: " + player3KC + " ";
-        output += "player4KC: " + player4KC + " ";
-        output += "player1RC: " + player1KC + " ";
-        return output;
+        return null;
     }
 
     /**
@@ -284,50 +221,19 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     }
 
     /**
-     * Builds a road for the plaeyr whose ID is passed into the function if they have the requisite resources and if it is their turn
+     * Builds a road for the player whose ID is passed into the function if they have the requisite resources and if it is their turn
      * @param playerID The Player building the road
      * @return true if the road got built, false if the player was out of turn or is out of resources.
      */
     public boolean buildRoad(int playerID) {
-        if (playerID == playerUp) {
-            switch (playerID) {
-                case 0:
-                    if (player1Brick >= 1 && player1Wood >= 1) {
-                        player1RC++;
-                        player1Wood--;
-                        player1Brick--;
-                        return true;
-                    }
-                    break;
-                case 1:
-                    if (player2Brick >= 1 && player2Wood >= 1) {
-                        player2RC++;
-                        player2Wood--;
-                        player2Brick--;
-                        return true;
-                    }
-                    break;
-                case 2:
-                    if (player3Brick >= 1 && player3Wood >= 1) {
-                        player3RC++;
-                        player3Wood--;
-                        player3Brick--;
-                        return true;
-                    }
-                    break;
-                case 3:
-                    if (player4Brick >= 1 && player4Wood >= 1) {
-                        player4RC++;
-                        player4Wood--;
-                        player4Brick--;
-                        return true;
-                    }
-                    break;
-            }
-            return false;
-        } else {
-            return false;
+        if(playerID != playerUp) return false;
+        if(playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
+            playerRCs[playerID]++;
+            playerBrick[playerID]--;
+            playerWood[playerID]--;
+            return true;
         }
+        return false;
     }
 
     /**
@@ -336,53 +242,15 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the build was legal, false if the player does not have the resources or played out of turn
      */
     public boolean buildSettlement(int playerID) {
-        if (playerID == playerUp) {
-            switch (playerID) {
-                case 0:
-                    if (player1Brick >= 1 && player1Wood >= 1 && player1Wheat >= 1 && player1Sheep >= 1) {
-                        player1VP++;
-                        player1Brick--;
-                        player1Sheep--;
-                        player1Wheat--;
-                        player1Wood--;
-                        return true;
-                    }
-                break;
-                case 1:
-                    if (player2Brick >= 1 && player2Wood >= 1 && player2Wheat >= 1 && player2Sheep >= 1) {
-                        player2VP++;
-                        player2Brick--;
-                        player2Sheep--;
-                        player2Wheat--;
-                        player2Wood--;
-                        return true;
-                    }
-                break;
-                case 2:
-                    if (player3Brick >= 1 && player3Wood >= 1 && player3Wheat >= 1 && player3Sheep >= 1) {
-                        player3VP++;
-                        player3Brick--;
-                        player3Sheep--;
-                        player3Wheat--;
-                        player3Wood--;
-                        return true;
-                    }
-                break;
-                case 3:
-                    if (player4Brick >= 1 && player4Wood >= 1 && player4Wheat >= 1 && player4Sheep >= 1) {
-                        player4VP++;
-                        player4Brick--;
-                        player4Sheep--;
-                        player4Wheat--;
-                        player4Wood--;
-                        return true;
-                    }
-                break;
-            }
+        if(playerID != playerUp) return false;
+        if(playerWheat[playerID] >= 1 && playerSheep[playerID] >= 1 && playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
+            playerWheat[playerID]--;
+            playerSheep[playerID]--;
+            playerBrick[playerID]--;
+            playerWood[playerID]--;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -391,51 +259,14 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the city is built, false if the player played out of turn or does not have the needed materials
      */
     public boolean upgradeToCity(int playerID) {
-        if (playerID == playerUp) {
-            //VP count only increases by one because cities replace
-            // settlements already on the board so net score increase is only 1
-            switch (playerID) {//no break statements because each case ends with a return instead
-                case 0:
-                    if (player1Wheat >= 2 && player1Ore >= 3) {
-                        player1Wheat -= 2;
-                        player1Ore -= 3;
-                        player1VP++;
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 1:
-                    if (player2Wheat >= 2 && player2Ore >= 3) {
-                        player2Wheat -= 2;
-                        player2Ore -= 3;
-                        player2VP++;
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 2:
-                    if (player3Wheat >= 2 && player3Ore >= 3) {
-                        player3Wheat -= 2;
-                        player3Ore -= 3;
-                        player3VP++;
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 3:
-                    if (player4Wheat >= 2 && player4Ore >= 3) {
-                        player4Wheat -= 2;
-                        player4Ore -= 3;
-                        player4VP++;
-                        return true;
-                    } else {
-                        return false;
-                    }
-            }
-            return false;
-        } else {
-            return false;
+        if (playerID != playerUp) return false;
+        if(playerWheat[playerID] >= 2 && playerOre[playerID] >= 3) {
+            playerVPs[playerID]++;
+            playerWheat[playerID] -= 2;
+            playerOre[playerID] -= 3;
+            return true;
         }
+        return false;
     }
 
     /**
@@ -445,69 +276,29 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      */
     public boolean purchaseDC(int playerID) {
         //player is awarded a random development card using a random int between 0 and 4
-        if (playerID == playerUp) {
-            switch (playerID) {
-                case 0:
-                    if (player1Wheat >= 1 && player1Sheep >= 1 && player1Ore >= 1) {
-                        player1Wheat--;
-                        player1Sheep--;
-                        player1Ore--;
-                        int cardID =(int) (Math.random() * 5);
-                        player1DC.add(cardID);
-                        if (cardID == VICTORY_POINT) {
-                            player1VP++;
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 1:
-                    if (player2Wheat >= 1 && player2Sheep >= 1 && player2Ore >= 1) {
-                        player2Wheat--;
-                        player2Sheep--;
-                        player2Ore--;
-                        int cardID =(int) (Math.random() * 5);
-                        player2DC.add(cardID);
-                        if (cardID == VICTORY_POINT) {
-                            player2VP++;
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 2:
-                    if (player3Wheat >= 1 && player3Sheep >= 1 && player3Ore >= 1) {
-                        player3Wheat--;
-                        player3Sheep--;
-                        player3Ore--;
-                        int cardID =(int) (Math.random() * 5);
-                        player3DC.add(cardID);
-                        if (cardID == VICTORY_POINT) {
-                            player3VP++;
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 3:
-                    if (player4Wheat >= 1 && player4Sheep >= 1 && player4Ore >= 1) {
-                        player4Wheat--;
-                        player4Sheep--;
-                        player4Ore--;
-                        int cardID =(int) (Math.random() * 5);
-                        player4DC.add(cardID);
-                        if (cardID == VICTORY_POINT) {
-                            player4VP++;
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
+
+        if(playerID != playerUp) return false;
+        if(playerWheat[playerID] >= 1 && playerSheep[playerID] >= 1 && playerOre[playerID] >= 1) {
+            playerWheat[playerID]--;
+            playerSheep[playerID]--;
+            playerOre[playerID]--;
+            int cardID = (int) (Math.random() * 5);
+            switch(playerID) {
+                case 0: //player 1
+                    player1DC.add(cardID); break;
+                case 1: //player 2
+                    player2DC.add(cardID); break;
+                case 2: //player 3
+                    player3DC.add(cardID); break;
+                case 3: //player 4
+                    player4DC.add(cardID); break;
+            }
+            if(cardID == VICTORY_POINT) {
+                playerVPs[playerID]++;
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -519,313 +310,270 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      */
     //TODO development card interactions are going to need GameActions later
     public boolean playDC(int playerID, int cardID, int resourceID) {
-        if (playerID == playerUp && cardID <= 4) {
-            switch (playerID) {
-                case 0://player 1
-                    if (player1DC.contains(cardID)) {
-                        player1DC.remove(cardID);
-                        switch (cardID) {//check which development card was played
-                            case MONOPOLY:
-                                switch (resourceID) {
-                                    case WHEAT:
-                                        int myWheat = player2Wheat + player3Wheat + player4Wheat;
-                                        player1Wheat += myWheat;
-                                        player2Wheat = 0;
-                                        player3Wheat = 0;
-                                        player4Wheat = 0;
-                                    break;
-                                    case SHEEP:
-                                        int mySheep = player2Sheep + player3Sheep + player4Sheep;
-                                        player1Sheep += mySheep;
-                                        player2Sheep = 0;
-                                        player3Sheep = 0;
-                                        player4Sheep = 0;
-                                    break;
-                                    case BRICK:
-                                        int myBrick = player2Brick + player3Brick + player4Brick;
-                                        player1Brick += myBrick;
-                                        player2Brick = 0;
-                                        player3Brick = 0;
-                                        player4Brick = 0;
-                                    break;
-                                    case ORE:
-                                        int myOre = player2Ore + player3Ore + player4Ore;
-                                        player1Ore += myOre;
-                                        player2Ore = 0;
-                                        player3Ore = 0;
-                                        player4Ore = 0;
-                                    break;
-                                    case WOOD:
-                                        int myWood = player2Wood + player3Wood + player4Wood;
-                                        player1Wood += myWood;
-                                        player2Wood = 0;
-                                        player3Wood = 0;
-                                        player4Wood = 0;
-                                    break;
-                                }
-                            break;
-                            case KNIGHT:
-                                player1KC++;
-                                //robber GameAction
-                            break;
-                            case ROAD_BUILDER:
-                                player1RC += 2;
-                                //place roads GameAction
-                            break;
-                            case YEAR_OF_PLENTY:
-                                switch(resourceID) {
-                                    case WHEAT:
-                                        player1Wheat += 2;
-                                    break;
-                                    case SHEEP:
-                                        player1Sheep += 2;
-                                    break;
-                                    case BRICK:
-                                        player1Brick += 2;
-                                    break;
-                                    case ORE:
-                                        player1Ore += 2;
-                                    break;
-                                    case WOOD:
-                                        player1Wood += 2;
-                                    break;
-                                }
-                            break;
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 1://player 2
-                    if (player2DC.contains(cardID)) {
-                        player2DC.remove(cardID);
-                        switch (cardID) {//check which development card was played
-                            case MONOPOLY:
-                                switch (resourceID) {
-                                    case WHEAT:
-                                        int myWheat = player1Wheat + player3Wheat + player4Wheat;
-                                        player2Wheat += myWheat;
-                                        player1Wheat = 0;
-                                        player3Wheat = 0;
-                                        player4Wheat = 0;
-                                        break;
-                                    case SHEEP:
-                                        int mySheep = player1Sheep + player3Sheep + player4Sheep;
-                                        player2Sheep += mySheep;
-                                        player1Sheep = 0;
-                                        player3Sheep = 0;
-                                        player4Sheep = 0;
-                                        break;
-                                    case BRICK:
-                                        int myBrick = player1Brick + player3Brick + player4Brick;
-                                        player2Brick += myBrick;
-                                        player1Brick = 0;
-                                        player3Brick = 0;
-                                        player4Brick = 0;
-                                        break;
-                                    case ORE:
-                                        int myOre = player1Ore + player3Ore + player4Ore;
-                                        player2Ore += myOre;
-                                        player1Ore = 0;
-                                        player3Ore = 0;
-                                        player4Ore = 0;
-                                        break;
-                                    case WOOD:
-                                        int myWood = player1Wood + player3Wood + player4Wood;
-                                        player2Wood += myWood;
-                                        player1Wood = 0;
-                                        player3Wood = 0;
-                                        player4Wood = 0;
-                                        break;
-                                }
+        if(!(playerID != playerUp && cardID <= 4)) return false;
+        switch(playerID) {
+            case 0: //player 1
+                if(!player1DC.contains(cardID)) return false; // if player 1 doesn't have the DC returns false (illegal move)
+                player1DC.remove(cardID);
+                switch(cardID) {
+                    case MONOPOLY:
+                        switch (resourceID) {
+                            case WHEAT:
+                                int myWheat = playerWheat[1] + playerWheat[2] + playerWheat[3];
+                                playerWheat[0] += myWheat;
+                                playerWheat[1] = 0;
+                                playerWheat[2] = 0;
+                                playerWheat[3] = 0;
                                 break;
-                            case KNIGHT:
-                                player2KC++;
-                                //robber GameAction
+                            case SHEEP:
+                                int mySheep = playerSheep[1] + playerSheep[2] + playerSheep[3];
+                                playerSheep[0] += mySheep;
+                                playerSheep[1] = 0;
+                                playerSheep[2] = 0;
+                                playerSheep[3] = 0;
                                 break;
-                            case ROAD_BUILDER:
-                                player2RC += 2;
-                                //place roads GameAction
+                            case BRICK:
+                                int myBrick = playerBrick[1] + playerBrick[2] + playerBrick[3];
+                                playerBrick[0] += myBrick;
+                                playerBrick[1] = 0;
+                                playerBrick[2] = 0;
+                                playerBrick[3] = 0;
                                 break;
-                            case YEAR_OF_PLENTY:
-                                switch(resourceID) {
-                                    case WHEAT:
-                                        player2Wheat += 2;
-                                        break;
-                                    case SHEEP:
-                                        player2Sheep += 2;
-                                        break;
-                                    case BRICK:
-                                        player2Brick += 2;
-                                        break;
-                                    case ORE:
-                                        player2Ore += 2;
-                                        break;
-                                    case WOOD:
-                                        player2Wood += 2;
-                                        break;
-                                }
+                            case ORE:
+                                int myOre = playerOre[1] + playerOre[2] + playerOre[3];
+                                playerOre[0] += myOre;
+                                playerOre[1] = 0;
+                                playerOre[2] = 0;
+                                playerOre[3] = 0;
+                                break;
+                            case WOOD:
+                                int myWood = playerWood[1] + playerWood[2] + playerWood[3];
+                                playerWood[0] += myWood;
+                                playerWood[1] = 0;
+                                playerWood[2] = 0;
+                                playerWood[3] = 0;
                                 break;
                         }
-                        return true;
-                    } else {
-                        return false;
+                        break;
+                    case KNIGHT:
+                        playerKCs[0]++; // knight GameAction
+                        break;
+                    case ROAD_BUILDER:
+                        playerRCs[0]++; // place roads GameAction
+                        break;
+                    case YEAR_OF_PLENTY:
+                        switch(resourceID) {
+                            case WHEAT:
+                                playerWheat[0] += 2; break;
+                            case SHEEP:
+                                playerSheep[0] += 2; break;
+                            case BRICK:
+                                playerBrick[0] += 2; break;
+                            case ORE:
+                                playerOre[0] += 2; break;
+                            case WOOD:
+                                playerWood[0] += 2; break;
+                        }
+                        break;
                 }
-                case 2://player 3
-                    if (player3DC.contains(cardID)) {
-                        player3DC.remove(cardID);
-                        switch (cardID) {//check which development card was played
-                            case MONOPOLY:
-                                switch (resourceID) {
-                                    case WHEAT:
-                                        int myWheat = player2Wheat + player1Wheat + player4Wheat;
-                                        player3Wheat += myWheat;
-                                        player2Wheat = 0;
-                                        player1Wheat = 0;
-                                        player4Wheat = 0;
-                                        break;
-                                    case SHEEP:
-                                        int mySheep = player2Sheep + player1Sheep + player4Sheep;
-                                        player3Sheep += mySheep;
-                                        player2Sheep = 0;
-                                        player1Sheep = 0;
-                                        player4Sheep = 0;
-                                        break;
-                                    case BRICK:
-                                        int myBrick = player2Brick + player1Brick + player4Brick;
-                                        player3Brick += myBrick;
-                                        player2Brick = 0;
-                                        player1Brick = 0;
-                                        player4Brick = 0;
-                                        break;
-                                    case ORE:
-                                        int myOre = player2Ore + player1Ore + player4Ore;
-                                        player3Ore += myOre;
-                                        player2Ore = 0;
-                                        player1Ore = 0;
-                                        player4Ore = 0;
-                                        break;
-                                    case WOOD:
-                                        int myWood = player2Wood + player1Wood + player4Wood;
-                                        player3Wood += myWood;
-                                        player2Wood = 0;
-                                        player1Wood = 0;
-                                        player4Wood = 0;
-                                        break;
-                                }
+                return true;
+            case 1: //player 2
+                if(!player2DC.contains(cardID)) return false; // if player 2 doesn't have the DC returns false (illegal move)
+                player2DC.remove(cardID);
+                switch(cardID) {
+                    case MONOPOLY:
+                        switch (resourceID) {
+                            case WHEAT:
+                                int myWheat = playerWheat[0] + playerWheat[2] + playerWheat[3];
+                                playerWheat[1] += myWheat;
+                                playerWheat[0] = 0;
+                                playerWheat[2] = 0;
+                                playerWheat[3] = 0;
                                 break;
-                            case KNIGHT:
-                                player3KC++;
-                                //robber GameAction
+                            case SHEEP:
+                                int mySheep = playerSheep[0] + playerSheep[2] + playerSheep[3];
+                                playerSheep[1] += mySheep;
+                                playerSheep[0] = 0;
+                                playerSheep[2] = 0;
+                                playerSheep[3] = 0;
                                 break;
-                            case ROAD_BUILDER:
-                                player3RC += 2;
-                                //place roads GameAction
+                            case BRICK:
+                                int myBrick = playerBrick[0] + playerBrick[2] + playerBrick[3];
+                                playerBrick[1] += myBrick;
+                                playerBrick[0] = 0;
+                                playerBrick[2] = 0;
+                                playerBrick[3] = 0;
                                 break;
-                            case YEAR_OF_PLENTY:
-                                switch(resourceID) {
-                                    case WHEAT:
-                                        player3Wheat += 2;
-                                        break;
-                                    case SHEEP:
-                                        player3Sheep += 2;
-                                        break;
-                                    case BRICK:
-                                        player3Brick += 2;
-                                        break;
-                                    case ORE:
-                                        player3Ore += 2;
-                                        break;
-                                    case WOOD:
-                                        player3Wood += 2;
-                                        break;
-                                }
+                            case ORE:
+                                int myOre = playerOre[0] + playerOre[2] + playerOre[3];
+                                playerOre[1] += myOre;
+                                playerOre[0] = 0;
+                                playerOre[2] = 0;
+                                playerOre[3] = 0;
+                                break;
+                            case WOOD:
+                                int myWood = playerWood[0] + playerWood[2] + playerWood[3];
+                                playerWood[1] += myWood;
+                                playerWood[0] = 0;
+                                playerWood[2] = 0;
+                                playerWood[3] = 0;
                                 break;
                         }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                case 3://player 4
-                    if (player4DC.contains(cardID)) {
-                        player4DC.remove(cardID);
-                        switch (cardID) {//check which development card was played
-                            case MONOPOLY:
-                                switch (resourceID) {
-                                    case WHEAT:
-                                        int myWheat = player2Wheat + player1Wheat + player3Wheat;
-                                        player4Wheat += myWheat;
-                                        player2Wheat = 0;
-                                        player1Wheat = 0;
-                                        player1Wheat = 0;
-                                        break;
-                                    case SHEEP:
-                                        int mySheep = player2Sheep + player1Sheep + player3Sheep;
-                                        player4Sheep += mySheep;
-                                        player2Sheep = 0;
-                                        player1Sheep = 0;
-                                        player3Sheep = 0;
-                                        break;
-                                    case BRICK:
-                                        int myBrick = player2Brick + player1Brick + player3Brick;
-                                        player4Brick += myBrick;
-                                        player2Brick = 0;
-                                        player1Brick = 0;
-                                        player3Brick = 0;
-                                        break;
-                                    case ORE:
-                                        int myOre = player2Ore + player1Ore + player3Ore;
-                                        player4Ore += myOre;
-                                        player2Ore = 0;
-                                        player1Ore = 0;
-                                        player3Ore = 0;
-                                        break;
-                                    case WOOD:
-                                        int myWood = player2Wood + player1Wood + player3Wood;
-                                        player4Wood += myWood;
-                                        player2Wood = 0;
-                                        player1Wood = 0;
-                                        player3Wood = 0;
-                                        break;
-                                }
+                        break;
+                    case KNIGHT:
+                        playerKCs[1]++;
+                        break;
+                    case ROAD_BUILDER:
+                        playerRCs[1]++;
+                        break;
+                    case YEAR_OF_PLENTY:
+                        switch(resourceID) {
+                            case WHEAT:
+                                playerWheat[1] += 2; break;
+                            case SHEEP:
+                                playerSheep[1] += 2; break;
+                            case BRICK:
+                                playerBrick[1] += 2; break;
+                            case ORE:
+                                playerOre[1] += 2; break;
+                            case WOOD:
+                                playerWood[1] += 2; break;
+                        }
+                        break;
+                }
+                break;
+            case 2: //player 3
+                if(!player3DC.contains(cardID)) return false; // if player 3 doesn't have the DC returns false (illegal move)
+                player3DC.remove(cardID);
+                switch(cardID) {
+                    case MONOPOLY:
+                        switch (resourceID) {
+                            case WHEAT:
+                                int myWheat = playerWheat[0] + playerWheat[1] + playerWheat[3];
+                                playerWheat[2] += myWheat;
+                                playerWheat[0] = 0;
+                                playerWheat[1] = 0;
+                                playerWheat[3] = 0;
                                 break;
-                            case KNIGHT:
-                                player4KC++;
-                                //robber GameAction
+                            case SHEEP:
+                                int mySheep = playerSheep[0] + playerSheep[1] + playerSheep[3];
+                                playerSheep[2] += mySheep;
+                                playerSheep[0] = 0;
+                                playerSheep[1] = 0;
+                                playerSheep[3] = 0;
                                 break;
-                            case ROAD_BUILDER:
-                                player4RC += 2;
-                                //place roads GameAction
+                            case BRICK:
+                                int myBrick = playerBrick[0] + playerBrick[1] + playerBrick[3];
+                                playerBrick[2] += myBrick;
+                                playerBrick[0] = 0;
+                                playerBrick[1] = 0;
+                                playerBrick[3] = 0;
                                 break;
-                            case YEAR_OF_PLENTY:
-                                switch(resourceID) {
-                                    case WHEAT:
-                                        player4Wheat += 2;
-                                        break;
-                                    case SHEEP:
-                                        player4Sheep += 2;
-                                        break;
-                                    case BRICK:
-                                        player4Brick += 2;
-                                        break;
-                                    case ORE:
-                                        player4Ore += 2;
-                                        break;
-                                    case WOOD:
-                                        player4Wood += 2;
-                                        break;
-                                }
+                            case ORE:
+                                int myOre = playerOre[0] + playerOre[1] + playerOre[3];
+                                playerOre[2] += myOre;
+                                playerOre[0] = 0;
+                                playerOre[1] = 0;
+                                playerOre[3] = 0;
+                                break;
+                            case WOOD:
+                                int myWood = playerWood[0] + playerWood[1] + playerWood[3];
+                                playerWood[2] += myWood;
+                                playerWood[0] = 0;
+                                playerWood[1] = 0;
+                                playerWood[3] = 0;
                                 break;
                         }
-                        return true;
-                    } else {
-                        return false;
-                    }
-            }
-            return true;
-        } else {
-            return false;
+                        break;
+                    case KNIGHT:
+                        playerKCs[2]++;
+                        break;
+                    case ROAD_BUILDER:
+                        playerRCs[2]++;
+                        break;
+                    case YEAR_OF_PLENTY:
+                        switch(resourceID) {
+                            case WHEAT:
+                                playerWheat[2] += 2; break;
+                            case SHEEP:
+                                playerSheep[2] += 2; break;
+                            case BRICK:
+                                playerBrick[2] += 2; break;
+                            case ORE:
+                                playerOre[2] += 2; break;
+                            case WOOD:
+                                playerWood[2] += 2; break;
+                        }
+                        break;
+                }
+                break;
+            case 3: //player 4
+                if(!player4DC.contains(cardID)) return false; // if player 4 doesn't have the DC returns false (illegal move)
+                player4DC.remove(cardID);
+                switch(cardID) {
+                    case MONOPOLY:
+                        switch (resourceID) {
+                            case WHEAT:
+                                int myWheat = playerWheat[0] + playerWheat[1] + playerWheat[2];
+                                playerWheat[3] += myWheat;
+                                playerWheat[0] = 0;
+                                playerWheat[1] = 0;
+                                playerWheat[2] = 0;
+                                break;
+                            case SHEEP:
+                                int mySheep = playerSheep[0] + playerSheep[1] + playerSheep[2];
+                                playerSheep[3] += mySheep;
+                                playerSheep[0] = 0;
+                                playerSheep[1] = 0;
+                                playerSheep[2] = 0;
+                                break;
+                            case BRICK:
+                                int myBrick = playerBrick[0] + playerBrick[1] + playerBrick[2];
+                                playerBrick[3] += myBrick;
+                                playerBrick[0] = 0;
+                                playerBrick[1] = 0;
+                                playerBrick[2] = 0;
+                                break;
+                            case ORE:
+                                int myOre = playerOre[0] + playerOre[1] + playerOre[2];
+                                playerOre[3] += myOre;
+                                playerOre[0] = 0;
+                                playerOre[1] = 0;
+                                playerOre[2] = 0;
+                                break;
+                            case WOOD:
+                                int myWood = playerWood[0] + playerWood[1] + playerWood[2];
+                                playerWood[3] += myWood;
+                                playerWood[0] = 0;
+                                playerWood[1] = 0;
+                                playerWood[2] = 0;
+                                break;
+                        }
+                        break;
+                    case KNIGHT:
+                        playerKCs[3]++;
+                        break;
+                    case ROAD_BUILDER:
+                        playerRCs[3]++;
+                        break;
+                    case YEAR_OF_PLENTY:
+                        switch(resourceID) {
+                            case WHEAT:
+                                playerWheat[3] += 2; break;
+                            case SHEEP:
+                                playerSheep[3] += 2; break;
+                            case BRICK:
+                                playerBrick[3] += 2; break;
+                            case ORE:
+                                playerOre[3] += 2; break;
+                            case WOOD:
+                                playerWood[3] += 2; break;
+                        }
+                        break;
+                }
+                break;
         }
+        return true;
     }
 
     /**
@@ -835,17 +583,11 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the robber was moved, false if the player moved out of turn
      */
     public boolean moveRobber(int playerID, int newPos) {
-        if (playerID == playerUp) {
-            if (lastRoll == 7 || knightPlayed) {
-                setRobberPos(newPos);
-                knightPlayed = false;
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        if(playerID != playerUp) return false;
+        if(lastRoll != 7 || !knightPlayed) return false;
+        setRobberPos(newPos);
+        knightPlayed = false;
+        return true;
     }
 
     /*
@@ -863,276 +605,276 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     public void setRobberPos(int newPos) {
         robberPos = newPos;
     }
-    public float getPlayer1Red() {
-        return player1Red;
+    public float getPlayer1Color() {
+        return playerColors[0];
     }
 
-    public float getPlayer2Blue() {
-        return player2Blue;
+    public float getPlayer2Color() {
+        return playerColors[1];
     }
 
-    public float getPlayer3Orange() {
-        return player3Orange;
+    public float getPlayer3Color() {
+        return playerColors[2];
     }
 
-    public float getPlayer4Cream() {
-        return player4Cream;
+    public float getPlayer4Color() {
+        return playerColors[3];
     }
 
     public int getPlayer1VP() {
-        return player1VP;
+        return playerVPs[0];
     }
 
     public void setPlayer1VP(int player1VP) {
-        this.player1VP = player1VP;
+        this.playerVPs[0] = player1VP;
     }
 
     public int getPlayer2VP() {
-        return player2VP;
+        return playerVPs[1];
     }
 
     public void setPlayer2VP(int player2VP) {
-        this.player2VP = player2VP;
+        this.playerVPs[1] = player2VP;
     }
 
     public int getPlayer3VP() {
-        return player3VP;
+        return playerVPs[2];
     }
 
     public void setPlayer3VP(int player3VP) {
-        this.player3VP = player3VP;
+        this.playerVPs[2] = player3VP;
     }
 
     public int getPlayer4VP() {
-        return player4VP;
+        return playerVPs[3];
     }
 
     public void setPlayer4VP(int player4VP) {
-        this.player4VP = player4VP;
+        this.playerVPs[3] = player4VP;
     }
 
     public int getPlayer1KC() {
-        return player1KC;
+        return playerKCs[0];
     }
 
     public void setPlayer1KC(int player1KC) {
-        this.player1KC = player1KC;
+        this.playerKCs[0] = player1KC;
     }
 
     public int getPlayer2KC() {
-        return player2KC;
+        return playerKCs[1];
     }
 
     public void setPlayer2KC(int player2KC) {
-        this.player2KC = player2KC;
+        this.playerKCs[1] = player2KC;
     }
 
     public int getPlayer3KC() {
-        return player3KC;
+        return playerKCs[2];
     }
 
     public void setPlayer3KC(int player3KC) {
-        this.player3KC = player3KC;
+        this.playerKCs[2] = player3KC;
     }
 
     public int getPlayer4KC() {
-        return player4KC;
+        return playerKCs[3];
     }
 
     public void setPlayer4KC(int player4KC) {
-        this.player4KC = player4KC;
+        this.playerKCs[3] = player4KC;
     }
 
     public int getPlayer1RC() {
-        return player1RC;
+        return playerRCs[0];
     }
 
     public void setPlayer1RC(int player1RC) {
-        this.player1RC = player1RC;
+        this.playerRCs[0] = player1RC;
     }
 
     public int getPlayer2RC() {
-        return player2RC;
+        return playerRCs[1];
     }
 
     public void setPlayer2RC(int player2RC) {
-        this.player2RC = player2RC;
+        this.playerRCs[1] = player2RC;
     }
 
     public int getPlayer3RC() {
-        return player3RC;
+        return playerRCs[2];
     }
 
     public void setPlayer3RC(int player3RC) {
-        this.player3RC = player3RC;
+        this.playerRCs[2] = player3RC;
     }
 
     public int getPlayer4RC() {
-        return player4RC;
+        return playerRCs[3];
     }
 
     public void setPlayer4RC(int player4RC) {
-        this.player4RC = player4RC;
+        this.playerRCs[3] = player4RC;
     }
 
     public int getPlayer1Ore() {
-        return player1Ore;
+        return playerOre[0];
     }
 
     public void setPlayer1Ore(int player1Ore) {
-        this.player1Ore = player1Ore;
+        this.playerOre[0] = player1Ore;
     }
 
     public int getPlayer2Ore() {
-        return player2Ore;
+        return playerOre[1];
     }
 
     public void setPlayer2Ore(int player2Ore) {
-        this.player2Ore = player2Ore;
+        this.playerOre[1] = player2Ore;
     }
 
     public int getPlayer3Ore() {
-        return player3Ore;
+        return playerOre[2];
     }
 
     public void setPlayer3Ore(int player3Ore) {
-        this.player3Ore = player3Ore;
+        this.playerOre[2] = player3Ore;
     }
 
     public int getPlayer4Ore() {
-        return player4Ore;
+        return playerOre[3];
     }
 
     public void setPlayer4Ore(int player4Ore) {
-        this.player4Ore = player4Ore;
+        this.playerOre[3] = player4Ore;
     }
 
     public int getPlayer1Wheat() {
-        return player1Wheat;
+        return playerWheat[0];
     }
 
     public void setPlayer1Wheat(int player1Wheat) {
-        this.player1Wheat = player1Wheat;
+        this.playerWheat[0] = player1Wheat;
     }
 
     public int getPlayer2Wheat() {
-        return player2Wheat;
+        return playerWheat[1];
     }
 
     public void setPlayer2Wheat(int player2Wheat) {
-        this.player2Wheat = player2Wheat;
+        this.playerWheat[1] = player2Wheat;
     }
 
     public int getPlayer3Wheat() {
-        return player3Wheat;
+        return playerWheat[2];
     }
 
     public void setPlayer3Wheat(int player3Wheat) {
-        this.player3Wheat = player3Wheat;
+        this.playerWheat[2] = player3Wheat;
     }
 
     public int getPlayer4Wheat() {
-        return player4Wheat;
+        return playerWheat[3];
     }
 
     public void setPlayer4Wheat(int player4Wheat) {
-        this.player4Wheat = player4Wheat;
+        this.playerWheat[3] = player4Wheat;
     }
 
     public int getPlayer1Brick() {
-        return player1Brick;
+        return playerBrick[0];
     }
 
     public void setPlayer1Brick(int player1Brick) {
-        this.player1Brick = player1Brick;
+        this.playerBrick[0] = player1Brick;
     }
 
     public int getPlayer2Brick() {
-        return player2Brick;
+        return playerBrick[1];
     }
 
     public void setPlayer2Brick(int player2Brick) {
-        this.player2Brick = player2Brick;
+        this.playerBrick[1] = player2Brick;
     }
 
     public int getPlayer3Brick() {
-        return player3Brick;
+        return playerBrick[2];
     }
 
     public void setPlayer3Brick(int player3Brick) {
-        this.player3Brick = player3Brick;
+        this.playerBrick[2] = player3Brick;
     }
 
     public int getPlayer4Brick() {
-        return player4Brick;
+        return playerBrick[3];
     }
 
     public void setPlayer4Brick(int player4Brick) {
-        this.player4Brick = player4Brick;
+        this.playerBrick[3] = player4Brick;
     }
 
     public int getPlayer1Sheep() {
-        return player1Sheep;
+        return playerSheep[0];
     }
 
     public void setPlayer1Sheep(int player1Sheep) {
-        this.player1Sheep = player1Sheep;
+        this.playerSheep[0] = player1Sheep;
     }
 
     public int getPlayer2Sheep() {
-        return player2Sheep;
+        return playerSheep[1];
     }
 
     public void setPlayer2Sheep(int player2Sheep) {
-        this.player2Sheep = player2Sheep;
+        this.playerSheep[1] = player2Sheep;
     }
 
     public int getPlayer3Sheep() {
-        return player3Sheep;
+        return playerSheep[2];
     }
 
     public void setPlayer3Sheep(int player3Sheep) {
-        this.player3Sheep = player3Sheep;
+        this.playerSheep[2] = player3Sheep;
     }
 
     public int getPlayer4Sheep() {
-        return player4Sheep;
+        return playerSheep[3];
     }
 
     public void setPlayer4Sheep(int player4Sheep) {
-        this.player4Sheep = player4Sheep;
+        this.playerSheep[3] = player4Sheep;
     }
 
     public int getPlayer1Wood() {
-        return player1Wood;
+        return playerWood[0];
     }
 
     public void setPlayer1Wood(int player1Wood) {
-        this.player1Wood = player1Wood;
+        this.playerWood[0] = player1Wood;
     }
 
     public int getPlayer2Wood() {
-        return player2Wood;
+        return playerWood[1];
     }
 
     public void setPlayer2Wood(int player2Wood) {
-        this.player2Wood = player2Wood;
+        this.playerWood[1] = player2Wood;
     }
 
     public int getPlayer3Wood() {
-        return player3Wood;
+        return playerWood[2];
     }
 
     public void setPlayer3Wood(int player3Wood) {
-        this.player3Wood = player3Wood;
+        this.playerWood[2] = player3Wood;
     }
 
     public int getPlayer4Wood() {
-        return player4Wood;
+        return playerWood[3];
     }
 
     public void setPlayer4Wood(int player4Wood) {
-        this.player4Wood = player4Wood;
+        this.playerWood[3] = player4Wood;
     }
 
     //My get functions for onCLick method messages
