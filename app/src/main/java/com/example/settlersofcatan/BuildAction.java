@@ -4,6 +4,7 @@ import com.example.game.GameFramework.actionMessage.GameAction;
 import com.example.game.GameFramework.players.GamePlayer;
 
 public class BuildAction extends GameAction {
+    public String building;
     /**
      * constructor for GameAction
      *
@@ -11,5 +12,6 @@ public class BuildAction extends GameAction {
      */
     public BuildAction(GamePlayer player, String building) {
         super(player);
+        this.building = building;
     }
 }

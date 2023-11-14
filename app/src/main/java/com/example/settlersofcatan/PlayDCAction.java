@@ -4,6 +4,7 @@ import com.example.game.GameFramework.actionMessage.GameAction;
 import com.example.game.GameFramework.players.GamePlayer;
 
 public class PlayDCAction extends GameAction {
+    public int cardPlayed;
     /**
      * constructor for GameAction
      *
@@ -11,5 +12,6 @@ public class PlayDCAction extends GameAction {
      */
     public PlayDCAction(GamePlayer player, int cardPlayed) {
         super(player);
+        this.cardPlayed = cardPlayed;
     }
 }
