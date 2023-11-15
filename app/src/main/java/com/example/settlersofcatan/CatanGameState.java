@@ -102,11 +102,9 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         }
         lastMsg = "Let the game Begin!";
         //TODO this the innitial fixed starting position for infrastructure and should be made variable for beta release
-        playerWheat[0] = 4;
+        playerWheat[0] = 1;
         playerBrick[0] = 1;
         playerWood[0] = 1;
-        playerSheep[0] = 1;
-        playerOre[0] = 4;
         //TODO set this to the proper innit for class
         playerWood[1] = 1;
         playerBrick[1] = 1;
