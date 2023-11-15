@@ -12,7 +12,7 @@ public class BuildAction extends GameAction {
     private float Q;
 
     /**
-     * constructor for GameAction when building a city or settlement
+     * constructor for GameAction
      *
      * @param player the player who created the action
      * @param building type of building being built (city or settlement)
@@ -21,6 +21,7 @@ public class BuildAction extends GameAction {
      */
     public BuildAction(GamePlayer player, String  building, float X, float Y) {
         super(player);
+        this.building = building;
     }
     /**
      * constructor for GameAction when building a road

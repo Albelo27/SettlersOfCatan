@@ -17,6 +17,7 @@ public class PlayDCAction extends GameAction {
      */
     public PlayDCAction(GamePlayer player, int cardPlayed, int resID) {
         super(player);
+        this.devCardPlayed = cardPlayed;
     }
 
 

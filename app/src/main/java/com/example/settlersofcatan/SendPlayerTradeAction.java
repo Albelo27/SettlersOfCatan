@@ -11,5 +11,6 @@ public class SendPlayerTradeAction extends GameAction {
      */
     public SendPlayerTradeAction(GamePlayer player, GamePlayer reciever) {
         super(player);
+        new SendTradeAction(reciever);
     }
 }
