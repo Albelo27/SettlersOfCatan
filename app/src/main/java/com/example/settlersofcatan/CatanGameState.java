@@ -2,6 +2,10 @@ package com.example.settlersofcatan;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+
+import com.example.util.Building;
+import com.example.util.DoNotTouch;
+import com.example.util.Hex;
 import com.example.util.Pair;
 import com.example.util.PlayerData;
 
@@ -35,24 +39,13 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     final int SHEEP = 3;
     final int WOOD = 4;
     //player color values
-    final float[] playerColors = {0xc12a43, 0x2a3ec1, 0xc17b2a, 0xe5c8a7};
+    final float[] playerColors = {0xFFc12a43, 0xFF2a3ec1, 0xFFc17b2a, 0xFFe5c8a7};
     //records the current player
     private int playerUp;
     //records the most recent roll made
     private int lastRoll;
     //can the player who's turn it is roll the dice
     private boolean canRoll;
-    //String for the gameState toString() method
-    //DEPRECATED
-    private String output;
-    //int that represents the robbers position on tiles 0-18
-    private int robberPos;
-    /*The board values array should hold two values
-        boardValues[X][0] should be the number on which that tile produces resources
-        and boardValues[X][1] should be which resource is produced
-     */
-    //TODO use the pre-generated board from 3rd edition Catan for Alpha release
-    int[][] boardValues = new int[19][2];
     //player VP Counts
     int[] playerVPs = new int[4];
     //playerKnightCount
@@ -71,7 +64,19 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     //wood
     int[] playerWood = new int[4];
     PlayerData[] data = new PlayerData[4];
-
+    DoNotTouch c = new DoNotTouch();
+    private int robberPos;
+    //these are the hard-coded values of the hexagons
+    Hex[] boardValues = {//first row
+            new Hex(ORE, 10, c.h0), new Hex(SHEEP, 2, c.h1), new Hex(WOOD, 9, c.h2),
+        //second row
+        new Hex(WHEAT, 12, c.h3), new Hex(BRICK, 6, c.h4), new Hex(SHEEP, 4, c.h5), new Hex(BRICK, 10, c.h6),
+        //third row
+        new Hex(WHEAT, 9, c.h7), new Hex(WOOD, 11, c.h8), new Hex(-1, -1, c.h9), new Hex(WOOD, 3, c.h10), new Hex(ORE, 8, c.h11),
+        //forth row
+        new Hex(WOOD, 8, c.h12), new Hex(ORE, 3, c.h13), new Hex(WHEAT, 4, c.h14), new Hex(SHEEP, 5, c.h15),
+        //final row
+        new Hex(BRICK, 5, c.h16), new Hex(WHEAT, 6, c.h17), new Hex(SHEEP, 11, c.h18)};
     /**
      * base constructor, initializes a new GameState for settlersofcatan
      */
@@ -80,8 +85,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         playerUp = 0;
         lastRoll = 7;//most common roll, placeholder for pre-setup
         canRoll = true;
-        output = "test";
-        robberPos = -1;//TODO should be set to the same position as the desert
+        robberPos = 9;//based on the pre-set board we are using for alpha release
         for (int k = 0; k < 4; k++) {//all of these arrays are 4 in length
             playerVPs[k] = 2;//players start with two settlements on the board
             playerKCs[k] = 0;
@@ -117,20 +121,11 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             this.data[k] = copy.data[k];//copy each of the playerData classes individually from the data array
         }
         for (int a = 0; a < boardValues.length; a++) {//copy board layout
-            for (int y = 0; y < boardValues[0].length; y++) {
-                this.boardValues[a][y] = copy.boardValues[a][y];
+            for (int u = 0; u < boardValues.length; u++) {
+                //this copy ctcr is a deep copy
+                this.boardValues[u] = new Hex(copy.boardValues[u]);
             }
         }
-    }
-//DEPRECATED
-    /**
-     * The toString() method returns a text-only output of the current gameState;
-     * variables and data that are stored as members of an array are listed under the name of the array and preceded with a # sign
-     * @return String
-     */
-    @Override
-    public String toString() {
-        return null;
     }
 
     /**
@@ -163,7 +158,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerRCs[playerID]++;
             playerBrick[playerID]--;
             playerWood[playerID]--;
-            data[playerID].roads.put(new Pair(X,Y), new Pair(Z,Q));
+            data[playerID].roads.put(new Pair(X, Y), new Pair(Z,Q));
             return true;
         }
         return false;
@@ -183,7 +178,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerSheep[playerID]--;
             playerBrick[playerID]--;
             playerWood[playerID]--;
-            data[playerID].buildings.put(new Pair(X, Y), "settlement");
+            data[playerID].buildings.add(new Building("settlement", X, Y,findAdjacents(X, Y)));
             return true;
         }
         return false;
@@ -202,8 +197,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerVPs[playerID]++;
             playerWheat[playerID] -= 2;
             playerOre[playerID] -= 3;
-            data[playerID].buildings.remove(new Pair(X, Y));
-            data[playerID].buildings.put(new Pair(X, Y), "city");
+            data[playerID].buildings.add(new Building("city", X, Y,findAdjacents(X, Y)));
             return true;
         }
         return false;
@@ -250,19 +244,31 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the robber was moved, false if the player moved out of turn
      */
     public boolean moveRobber(int playerID, int newPos) {
+        //TODO update for new Hex object
         if(playerID != playerUp) return false;
         setRobberPos(newPos);
         return true;
     }
 
-   //Getters and Setters
+    public Hex[] findAdjacents(float x, float y) {
+        ArrayList<Hex> list = new ArrayList<Hex>();
+        Hex[] output = new Hex[3];
+        for (Hex hex : boardValues) {
+            if (hex.hasCorner(x, y)) {
+                list.add(hex);
+            }
+        }
+        list.toArray(output);
+        return output;
+    }
+
+    //Getters and Setters
     public PlayerData getData(int playerID) {
         return data[playerID];
     }
     public int getPlayerUp() {
         return playerUp;
     }
-
     public int getRobberPos() {
         return robberPos;
     }

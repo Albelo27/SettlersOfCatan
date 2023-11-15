@@ -1,25 +1,31 @@
 package com.example.util;
 
 public class DoNotTouch {
-    public final float X0 = 732; /*i touched it
-                                 -Reiss P.S. pls don't break my wrists ty.*/
-    public final float X1 = 785; public final float X2 = 838; public final float X3 = 891; public final float X4 = 944; public final float X5 = 997; public final float X6 = 1050; public final float X7 = 1103; public final float X8 = 1156; public final float X9 = 1209; public final float X10 = 1262;
-
-    /* I touched it */
-    public final float Y0 = 0;
-    public final float Y1 = 31;
-    public final float Y2 = 93;
-    public final float Y3 = 124;
-    public final float Y4 = 186;
-    public final float Y5 = 217;
-    public final float Y6 = 279;
-    public final float Y7 = 310;
-    public final float Y8 = 372;
-    public final float Y9 = 403;
-    public final float Y10 = 465;
-    public final float Y11 = 496;
-
     public DoNotTouch() {
         //this ctor is doing its best
     }
+    //X and Y arrays that represent the coordinates of the intersections of the hexagons
+    public final float[] X = {732, 785, 838, 891, 944, 997, 1050, 1103, 1156, 1209, 1262};
+    public final float[] Y = {0, 31, 93, 125, 186, 217, 279, 310, 372, 403, 465, 496};
+    //arrays that represent the six coordinate pairs of each hex
+    //don't ask why I did it this way I was stressed and under pressure
+    public float[] h0 = {X[2], Y[1], X[3], Y[0], X[4], Y[1], X[4], Y[2], X[3], Y[3], X[2], Y[2]};
+    public float[] h1 = {X[4], Y[1], X[5], Y[0], X[6], Y[1], X[6], Y[2], X[5], Y[3], X[4], Y[2]};
+    public float[] h2 = {X[6], Y[1], X[7], Y[0], X[8], Y[1], X[8], Y[2], X[7], Y[3], X[6], Y[2]};
+    public float[] h3 = {X[1], Y[3], X[2], Y[2], X[3], Y[3], X[3], Y[4], X[2], Y[5], X[1], Y[4]};
+    public float[] h4 = {X[3], Y[3], X[4], Y[2], X[5], Y[3], X[5], Y[4], X[4], Y[5], X[3], Y[4]};
+    public float[] h5 = {X[5], Y[3], X[6], Y[2], X[7], Y[3], X[7], Y[4], X[6], Y[5], X[5], Y[4]};
+    public float[] h6 = {X[7], Y[3], X[8], Y[2], X[9], Y[3], X[9], Y[4], X[8], Y[5], X[7], Y[4]};
+    public float[] h7 = {X[0], Y[5], X[1], Y[4], X[2], Y[5], X[2], Y[6], X[1], Y[7], X[0], Y[6]};
+    public float[] h8 = {X[2], Y[5], X[3], Y[4], X[4], Y[5], X[4], Y[6], X[3], Y[7], X[2], Y[6]};
+    public float[] h9 = {X[4], Y[5], X[5], Y[4], X[6], Y[5], X[6], Y[6], X[5], Y[7], X[4], Y[6]};
+    public float[] h10 = {X[6], Y[5], X[7], Y[4], X[8], Y[5], X[8], Y[6], X[7], Y[7], X[6], Y[6]};
+    public float[] h11 = {X[8], Y[5], X[9], Y[4], X[10], Y[5], X[10], Y[6], X[9], Y[7], X[8], Y[6]};
+    public float[] h12 = {X[1], Y[7], X[2], Y[6], X[3], Y[7], X[3], Y[8], X[2], Y[9], X[1], Y[8]};
+    public float[] h13 = {X[3], Y[7], X[4], Y[6], X[5], Y[7], X[5], Y[8], X[4], Y[9], X[3], Y[8]};
+    public float[] h14 = {X[5], Y[7], X[6], Y[6], X[7], Y[7], X[7], Y[8], X[6], Y[9], X[5], Y[8]};
+    public float[] h15 = {X[7], Y[7], X[8], Y[6], X[9], Y[7], X[9], Y[8], X[8], Y[9], X[7], Y[8]};
+    public float[] h16 = {X[2], Y[9], X[3], Y[8], X[4], Y[9], X[4], Y[10], X[3], Y[11], X[2], Y[10]};
+    public float[] h17 = {X[4], Y[9], X[5], Y[8], X[6], Y[9], X[6], Y[10], X[5], Y[11], X[4], Y[10]};
+    public float[] h18 = {X[6], Y[9], X[7], Y[8], X[8], Y[9], X[8], Y[10], X[7], Y[11], X[6], Y[10]};
 }

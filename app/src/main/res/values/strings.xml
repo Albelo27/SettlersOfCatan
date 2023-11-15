@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">SettlersOfCatan</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="roll"> Roll Dice</string>
+    <string name="end"> End Turn</string>
+    <string name="resTitle">Resources</string>
+    <string name="dcTitle">Development Cards</string>
+    <string name="buildTitle">Build Things</string>
+    <string name="tradeTitle">Trade</string>
+    <string name="roadName">Road</string>
+    <string name="settlementName">Settlement</string>
+    <string name="cityName">City</string>
 </resources>

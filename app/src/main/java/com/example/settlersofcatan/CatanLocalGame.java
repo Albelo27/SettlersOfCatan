@@ -24,7 +24,7 @@ public class CatanLocalGame extends LocalGame {
      */
     public CatanLocalGame() {
         gameState = new CatanGameState();
-;    }
+    }
 
     @Override
     protected void sendUpdatedStateTo(GamePlayer p) {
@@ -42,8 +42,7 @@ public class CatanLocalGame extends LocalGame {
 
     @Override
     protected String checkIfGameOver() {
-        //gameState can not reach a point where the game is 'over'
-        return "lol";
+        return null;
     }
 
     @Override
