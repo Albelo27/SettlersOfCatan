@@ -1,5 +1,7 @@
 package com.example.settlersofcatan;
 
+import android.util.Log;
+
 import com.example.game.GameFramework.LocalGame;
 import com.example.game.GameFramework.actionMessage.GameAction;
 import com.example.game.GameFramework.infoMessage.GameState;
@@ -28,7 +30,7 @@ public class CatanLocalGame extends LocalGame {
 
     @Override
     protected void sendUpdatedStateTo(GamePlayer p) {
-        //TODO implement this for beta release
+        p.sendInfo(new CatanGameState(gameState));
     }
 
     @Override
@@ -38,7 +40,14 @@ public class CatanLocalGame extends LocalGame {
 
     @Override
     protected String checkIfGameOver() {
-        return null;
+        String out = null;
+        for (int a = 0; a < gameState.playerVPs.length; a++) {
+            if (gameState.playerVPs[a] >= 10) {
+                out = playerNames[a] + " Won!";
+            }
+        }
+        Log.e("GameOver", "GameOver");
+        return out;
     }
 
     @Override
