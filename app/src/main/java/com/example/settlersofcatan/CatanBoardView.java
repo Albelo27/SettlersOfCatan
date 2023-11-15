@@ -11,18 +11,23 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import com.example.util.Building;
 import com.example.util.DoNotTouch;
 import com.example.util.Hex;
+import com.example.util.PlayerData;
 
 public class CatanBoardView extends SurfaceView {
 
     private final DoNotTouch c = new DoNotTouch();
+    private CatanGameState gs;
     private final Hex[] hexVals = new Hex[19];
     private final Paint orePaint = new Paint();
     private final Paint brickPaint = new Paint();
     private final Paint sheepPaint = new Paint();
     private final Paint wheatPaint = new Paint();
     private final Paint woodPaint = new Paint();
+    private Paint[] playerPaint = new Paint[4];
+
     private final Path path = new Path();
 
     public CatanBoardView(Context c, AttributeSet attr) {
@@ -35,6 +40,18 @@ public class CatanBoardView extends SurfaceView {
         orePaint.setStyle(Paint.Style.FILL);
         sheepPaint.setStyle(Paint.Style.FILL);
         brickPaint.setStyle(Paint.Style.FILL);
+        playerPaint[0] = new Paint();
+        playerPaint[1] = new Paint();
+        playerPaint[2] = new Paint();
+        playerPaint[3] = new Paint();
+        for (Paint p : playerPaint) {
+            p.setStrokeWidth(5);
+            p.setStyle(Paint.Style.FILL);
+        }
+        playerPaint[0].setColor(0xFFc12a43);
+        playerPaint[1].setColor(0xFF2a3ec1);
+        playerPaint[2].setColor(0xFFc17b2a);
+        playerPaint[3].setColor(0xFFe5c8a7);
         wheatPaint.setColor(0xffd8cd14);
         woodPaint.setColor(0xff124408);
         orePaint.setColor(0xff353e45);
@@ -45,6 +62,10 @@ public class CatanBoardView extends SurfaceView {
 
     public void setHexVals(Hex[] hexIn) {
         System.arraycopy(hexIn, 0, hexVals, 0, hexVals.length);
+    }
+
+    public void setGameState(CatanGameState gameState) {
+        gs = gameState;
     }
 
     @Override
@@ -71,6 +92,17 @@ public class CatanBoardView extends SurfaceView {
                 }
             }
         }
+        if (gs != null) {
+           for (int a = 0; a < gs.data.length; a++) {
+               for (Building b : gs.data[a].buildings) {
+                   canvas.drawCircle(b.getX(), b.getY(), 17, playerPaint[a]);
+               }
+               for (float[] f : gs.data[a].roads) {
+                    canvas.drawLine(f[0], f[1], f[2], f[3], playerPaint[a]);
+               }
+           }
+        }
+
     }
 
     private void traceHex(float[] cords) {
@@ -80,6 +112,4 @@ public class CatanBoardView extends SurfaceView {
             path.lineTo(cords[a], cords[a+1]);
         }
     }
-
-
 }//end of class

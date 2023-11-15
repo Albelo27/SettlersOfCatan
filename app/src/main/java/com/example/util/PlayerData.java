@@ -18,7 +18,7 @@ import java.util.Hashtable;
 public class PlayerData {
     public ArrayList<Integer> devCards;
     public ArrayList<Building> buildings;
-    public Hashtable<Pair, Pair> roads;
+    public ArrayList<float[]> roads;
 
     /**
      * Creates a new PLayerData class
@@ -26,7 +26,7 @@ public class PlayerData {
     public PlayerData() {
         devCards = new ArrayList<Integer>();
         buildings = new ArrayList<Building>();
-        roads = new Hashtable<Pair, Pair>();
+        roads = new ArrayList<float[]>();
     }
 
     /**
@@ -38,9 +38,7 @@ public class PlayerData {
         this.devCards.addAll(copy.devCards);
         this.buildings = new ArrayList<Building>();
         this.buildings.addAll(copy.buildings);
-        this.roads = new Hashtable<Pair, Pair>();
-        for (Pair key: copy.roads.keySet()) {
-            this.roads.put(new Pair(key), new Pair(copy.roads.get(key)));
-        }
+        this.roads = new ArrayList<float[]>();
+        this.roads.addAll(copy.roads);
     }
 }

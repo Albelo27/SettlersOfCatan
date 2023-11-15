@@ -5,8 +5,8 @@ public class DoNotTouch {
         //this ctor is doing its best
     }
     //X and Y arrays that represent the coordinates of the intersections of the hexagons
-    public final float[] X = {732, 785, 838, 891, 944, 997, 1050, 1103, 1156, 1209, 1262};
-    public final float[] Y = {0, 31, 93, 125, 186, 217, 279, 310, 372, 403, 465, 496};
+    public final float[] X = {732, 785, 838, 891, 944, 997, 1050, 1103, 1156, 1209, 1262}; //length = 11
+    public final float[] Y = {0, 31, 93, 125, 186, 217, 279, 310, 372, 403, 465, 496};//length = 12
     //arrays that represent the six coordinate pairs of each hex
     //don't ask why I did it this way I was stressed and under pressure
     public float[] h0 = {X[2], Y[1], X[3], Y[0], X[4], Y[1], X[4], Y[2], X[3], Y[3], X[2], Y[2]};

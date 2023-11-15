@@ -34,4 +34,6 @@ public class Building {
     public float getY() {
         return yPos;
     }
+
+    public Hex[] getTiles() {return closeTiles;}
 }

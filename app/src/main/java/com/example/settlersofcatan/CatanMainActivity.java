@@ -34,15 +34,14 @@ public class CatanMainActivity extends GameMainActivity {
         ArrayList<GamePlayerType> playerTypes = new ArrayList<GamePlayerType>();
         //local human player
         playerTypes.add(new GamePlayerType("Local Human Player") {
-            public GamePlayer createPlayer(String name) {
-                return new CatanHumanPlayer(name);
-            }});
-
+            public GamePlayer createPlayer(String name) {return new CatanHumanPlayer(name);}});
+        playerTypes.add(new GamePlayerType("Catan Computer Opponent") {
+            public GamePlayer createPlayer(String name) {return new CatanAI(name);}});
         //create a default gameConfig
         GameConfig defaultConfig = new GameConfig(playerTypes, 2, 4, "Settlers of Catan", PORT_NUMBER);
         defaultConfig.addPlayer("Human", 0);
-        defaultConfig.addPlayer("Human 2: Electric Boogalo", 0);
-
+        defaultConfig.addPlayer("SkyNet", 1);
+        defaultConfig.setRemoteData("Remote Human Player", "", 0);
         return defaultConfig;
     }
 

@@ -9,4 +9,5 @@
     <string name="roadName">Road</string>
     <string name="settlementName">Settlement</string>
     <string name="cityName">City</string>
+    <string name="diceTitle">Dice:</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.example.settlersofcatan;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -97,6 +99,21 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerWood[k] = 0;
             data[k] = new PlayerData(); //create a new class that contains the player's roads, cards and buildings
         }
+        playerWheat[0] = 1;
+        playerBrick[0] = 1;
+        playerWood[0] = 1;
+        playerWood[1] = 1;
+        playerBrick[1] = 1;
+        playerOre[1] = 1;
+        //TODO this the innitial fixed starting position for infrastructure and should be made variable for beta release
+        data[0].buildings.add(new Building("settlement", c.X[3], c.Y[4], findAdjacents(c.X[3], c.Y[4])));
+        data[0].buildings.add(new Building("settlement", c.X[8], c.Y[6], findAdjacents(c.X[8], c.Y[6])));
+        data[0].roads.add(new float[] {c.X[8], c.Y[6], c.X[8], c.Y[5]});
+        data[0].roads.add(new float[] {c.X[3], c.Y[4], c.X[2], c.Y[5]});
+        data[1].buildings.add(new Building("settlement", c.X[3], c.Y[8], findAdjacents(c.X[3], c.Y[8])));
+        data[1].buildings.add(new Building("settlement", c.X[7], c.Y[8], findAdjacents(c.X[7], c.Y[8])));
+        data[1].roads.add(new float[] {c.X[3], c.Y[8], c.X[4], c.Y[9]});
+        data[1].roads.add(new float[] {c.X[7], c.Y[8], c.X[7], c.Y[7]});
     }
     /**
      * Creates a deep copy of the game State you pass into the function
@@ -127,7 +144,6 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             }
         }
     }
-
     /**
      * Creates two random integer values between 1 and 6 and adds them together
      * @param playerId the player who sent the rollDice action call
@@ -137,9 +153,53 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         if (playerId == playerUp && canRoll) {
             //roll two dice to attempt to mimic the real odds of rolling two dice, eg. 7 is more common than 11
             lastRoll = (int)(Math.ceil(Math.random() * 6) + Math.ceil(Math.random()*6));
+            Log.e("GameState", Integer.toString(lastRoll));
+            canRoll = false;
             return true;
         } else {
             return false;
+        }
+    }
+
+    public boolean getRes(int playerId) {
+        Log.e("GameState", "getres");
+        if (!canRoll && playerId == playerUp) {
+            for (int a = 0; a < data.length; a++) {
+                for(Building b : data[a].buildings) {
+                    for (Hex h : b.getTiles()) {
+                        if (h.getGenNum() == lastRoll){
+                            if (b.getName().equals("city")) {
+                                giveRes(a, h.getResource(), true);
+                            } else if (b.getName().equals("settlement")) {
+                                giveRes(a, h.getResource(), false);
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void giveRes(int playerId, int resID, boolean is2) {
+        switch(resID) {
+            case WHEAT:
+                if (is2) {playerWheat[playerId]+=2;} else {playerWheat[playerId]++;}
+                break;
+            case ORE:
+                if (is2) {playerOre[playerId]+=2;} else {playerOre[playerId]++;}
+                break;
+            case BRICK:
+                if (is2) {playerBrick[playerId]+=2;} else {playerBrick[playerId]++;}
+                break;
+            case SHEEP:
+                if (is2) {playerSheep[playerId]+=2;} else {playerSheep[playerId]++;}
+                break;
+            case WOOD:
+                if (is2) {playerWood[playerId]+=2;} else {playerWood[playerId]++;}
+                break;
         }
     }
 
@@ -158,7 +218,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerRCs[playerID]++;
             playerBrick[playerID]--;
             playerWood[playerID]--;
-            data[playerID].roads.put(new Pair(X, Y), new Pair(Z,Q));
+            data[playerID].roads.add(new float[]{X, Y, Z, Q});
             return true;
         }
         return false;
@@ -263,16 +323,17 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     }
 
     //Getters and Setters
+
     public PlayerData getData(int playerID) {
         return data[playerID];
     }
-    public int getPlayerUp() {
-        return playerUp;
-    }
+    public int getPlayerUp() {return playerUp;}
+    public void setPlayerUp(int p) {playerUp = p;}
+    public boolean getCanRoll() {return canRoll;}
+    public void setCanRoll(boolean c) {canRoll = c;}
     public int getRobberPos() {
         return robberPos;
     }
-
     public void setRobberPos(int newPos) {
         robberPos = newPos;
     }

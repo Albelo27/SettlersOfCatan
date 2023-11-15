@@ -1,4 +1,4 @@
-package com.example.settlersofcatan;
+package com.example.actions;
 
 import com.example.game.GameFramework.actionMessage.GameAction;
 import com.example.game.GameFramework.players.GamePlayer;
