@@ -67,6 +67,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     int[] playerWood = new int[4];
     PlayerData[] data = new PlayerData[4];
     DoNotTouch c = new DoNotTouch();
+    private String lastMsg = "";
     private int robberPos;
     //these are the hard-coded values of the hexagons
     Hex[] boardValues = {//first row
@@ -99,13 +100,17 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerWood[k] = 0;
             data[k] = new PlayerData(); //create a new class that contains the player's roads, cards and buildings
         }
-        playerWheat[0] = 1;
+        lastMsg = "Let the game Begin!";
+        //TODO this the innitial fixed starting position for infrastructure and should be made variable for beta release
+        playerWheat[0] = 4;
         playerBrick[0] = 1;
         playerWood[0] = 1;
+        playerSheep[0] = 1;
+        playerOre[0] = 4;
+        //TODO set this to the proper innit for class
         playerWood[1] = 1;
         playerBrick[1] = 1;
         playerOre[1] = 1;
-        //TODO this the innitial fixed starting position for infrastructure and should be made variable for beta release
         data[0].buildings.add(new Building("settlement", c.X[3], c.Y[4], findAdjacents(c.X[3], c.Y[4])));
         data[0].buildings.add(new Building("settlement", c.X[8], c.Y[6], findAdjacents(c.X[8], c.Y[6])));
         data[0].roads.add(new float[] {c.X[8], c.Y[6], c.X[8], c.Y[5]});
@@ -126,6 +131,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         this.lastRoll = copy.lastRoll;
         this.canRoll = copy.canRoll;
         this.robberPos = copy.robberPos;
+        this.lastMsg = copy.lastMsg;
         for (int k = 0; k < 4; k++) {//4-long arrays
             this.playerVPs[k] = copy.playerVPs[k];
             this.playerKCs[k] = copy.playerKCs[k];
@@ -150,11 +156,14 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the player rolled the dice and update the gameState, false if the player rolled out of turn
      */
     public boolean rollDice(int playerId) {
+        //TODO make the dice display the actual roll
         if (playerId == playerUp && canRoll) {
             //roll two dice to attempt to mimic the real odds of rolling two dice, eg. 7 is more common than 11
             lastRoll = (int)(Math.ceil(Math.random() * 6) + Math.ceil(Math.random()*6));
             Log.e("GameState", Integer.toString(lastRoll));
             canRoll = false;
+            int placeholder = playerId + 1;
+            setLastMsg("Player " + placeholder + " rolled a " + lastRoll + "!");
             return true;
         } else {
             return false;
@@ -215,11 +224,29 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     public boolean buildRoad(int playerID, float X, float Y, float Z, float Q) {
         if(playerID != playerUp) return false;
         if(playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
-            playerRCs[playerID]++;
-            playerBrick[playerID]--;
-            playerWood[playerID]--;
-            data[playerID].roads.add(new float[]{X, Y, Z, Q});
-            return true;
+            if (checkLegalRoad(playerID, X, Y, Z, Q)) {
+                playerRCs[playerID]++;
+                playerBrick[playerID]--;
+                playerWood[playerID]--;
+                data[playerID].roads.add(new float[]{X, Y, Z, Q});
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkLegalRoad(int playerID, float X, float Y, float Z, float Q) {
+        for (Building b : data[playerID].buildings) {
+            if ((b.getX() == X && b.getY() == Y)||(b.getX() == Z && b.getY() == Q)) {
+                return true;
+            }
+        }
+        for (float[] fl : data[playerID].roads) {
+            if ((fl[0] == X && fl[1] == Y)||(fl[2] == X && fl[3] == Y)) {
+                return true;
+            } else if ((fl[0] == Z && fl[1] == Q)||(fl[2] == Z && fl[3] == Q)) {
+                return true;
+            }
         }
         return false;
     }
@@ -233,13 +260,33 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      */
     public boolean buildSettlement(int playerID, float X, float Y) {
         if(playerID != playerUp) return false;
+
         if(playerWheat[playerID] >= 1 && playerSheep[playerID] >= 1 && playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
-            playerWheat[playerID]--;
-            playerSheep[playerID]--;
-            playerBrick[playerID]--;
-            playerWood[playerID]--;
-            data[playerID].buildings.add(new Building("settlement", X, Y,findAdjacents(X, Y)));
+            Log.e("gameState", "buildSettlement");
+            if (checkLegalSettlement(playerID, X, Y)) {
+                Log.e("GameState", "Legal Settlement");
+                playerWheat[playerID]--;
+                playerSheep[playerID]--;
+                playerBrick[playerID]--;
+                playerWood[playerID]--;
+                playerVPs[playerID]++;
+                data[playerID].buildings.add(new Building("settlement", X, Y,findAdjacents(X, Y)));
+            }
             return true;
+        }
+        return false;
+    }
+
+    public boolean checkLegalSettlement(int playerID, float x, float y) {
+        //TODO make this check if there are two roads instead of just one
+        for (float[] f : data[playerID].roads) {
+            String out = "x " + x + " y " + y + " f[0] " + f[0] + " f[1] " + f[1] + " f[2] " + f[2] + " f[3] " + f[3];
+            Log.e("checkLegal", out);
+            if (f[0] == x && f[1] == y) {
+                return true;
+            } else if (f[2] == x && f[3] == y) {
+                return true;
+            }
         }
         return false;
     }
@@ -254,11 +301,24 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     public boolean upgradeToCity(int playerID, float X, float Y) {
         if (playerID != playerUp) return false;
         if(playerWheat[playerID] >= 2 && playerOre[playerID] >= 3) {
-            playerVPs[playerID]++;
-            playerWheat[playerID] -= 2;
-            playerOre[playerID] -= 3;
-            data[playerID].buildings.add(new Building("city", X, Y,findAdjacents(X, Y)));
-            return true;
+            if (checkLegalCity(playerID, X, Y)) {
+                playerVPs[playerID]++;
+                playerWheat[playerID] -= 2;
+                playerOre[playerID] -= 3;
+                data[playerID].buildings.add(new Building("city", X, Y,findAdjacents(X, Y)));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkLegalCity(int playerID, float x, float y) {
+        for (Building b : data[playerID].buildings){
+            if (b.getName().equals("settlement")) {
+                if (b.getX() == x && b.getY() == y) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -337,6 +397,8 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     public void setRobberPos(int newPos) {
         robberPos = newPos;
     }
+    public String getLastMsg() {return lastMsg;}
+    public void setLastMsg(String msg) {lastMsg = msg;}
     public float getPlayer1Color() {
         return playerColors[0];
     }

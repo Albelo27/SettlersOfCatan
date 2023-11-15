@@ -4,21 +4,18 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.actions.BuildAction;
 import com.example.actions.RollDiceAction;
 import com.example.game.GameFramework.GameMainActivity;
 import com.example.game.GameFramework.actionMessage.EndTurnAction;
 import com.example.game.GameFramework.infoMessage.GameInfo;
 import com.example.game.GameFramework.players.GameHumanPlayer;
-import com.example.util.Building;
 import com.example.util.DoNotTouch;
 import com.example.util.Hex;
-
-import java.util.ArrayList;
 
 /**
  * CatanHumanPlayer maintains the GUI as well as interprets the moves and interactions by a local user
@@ -44,6 +41,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     4 building road pt2
     more coming soon with more functionality in the beta release
      */
+    //TODO add above 'more functionality'
     private int classState = 0;
     private Button tradeButton;
     private Button rollButton;
@@ -71,6 +69,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     private CatanGameState gameState;
     CatanBoardView view;
     DoNotTouch c = new DoNotTouch();
+    float[] roadCords = new float[4];
     final int ORE = 0;
     final int WHEAT = 1;
     final int BRICK = 2;
@@ -160,7 +159,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     }//setAsGui
 
     @Override
-    public void onClick(View view) {
+    public void onClick(View view) {//TODO add and indicator for classState to the UI
         if (view.equals(tradeButton)) { //trade
             //TODO implement trading
         } else if (view.equals(rollButton) ) { //roll
@@ -170,13 +169,29 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         } else if (view.equals(endTurnButton)) { //end turn
             game.sendAction(new EndTurnAction(this));
         } else if (view.equals(roadButton)) { //road
-            Log.e("HIIIIII :3", "road");
+            if (classState == 3) {
+                Log.e("HumanPlayer", Integer.toString(classState));
+                classState = 0;
+            } else if (classState == 4) {
+                Log.e("HumanPlayer", Integer.toString(classState));
+                classState = 0;
+            } else {
+                Log.e("HumanPlayer", Integer.toString(classState));
+                classState = 3;
+            }
         } else if (view.equals(settlementButton)) { //settlement
-
+            if (classState == 1) {
+                classState = 0;
+            } else {
+                classState = 1;
+            }
         } else if (view.equals(cityButton)) { //city
-            Log.e("HIIIIII :3", "city");
+            if (classState == 2) {
+                classState = 0;
+            } else {
+                classState = 2;
+            }
         }
-
 //        else if (view.equals(oreButton)) { //ore
 //            Log.e("HIIIIII :3", "ore");
 //        } else if (view.equals(wheatButton)) { //wheat
@@ -191,7 +206,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     }//onclick
 
     @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
+    public boolean onTouch(View v, MotionEvent motionEvent) {
         float xPos = -1;
         float yPos = -1;
         for (int x = 0; x < c.X.length; x++) {
@@ -204,10 +219,32 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 yPos = c.Y[y];
             }
         }
+        if (v.equals(this.view)) {
+            if (classState == 0) {
+                return false;
+            } else if (classState == 1) {
+                game.sendAction(new BuildAction(this, "settlement", xPos, yPos));
+            } else if (classState == 2) {
+                game.sendAction(new BuildAction(this, "city", xPos, yPos));
+            } else if (classState == 3) {
+                Log.e("human player", "road pt1");
+                roadCords[0] = xPos;
+                roadCords[1] = yPos;
+                classState = 4;
+            } else if (classState == 4) {
+                Log.e("humanPlayer", "road pt2");
+                roadCords[2] = xPos;
+                roadCords[3] = yPos;
+                game.sendAction(new BuildAction(this, "road", roadCords[0], roadCords[1], roadCords[2], roadCords[3]));
+            }
+            updateUI();
+        }
         return false;
     }//onTouch
 
     public void updateUI() {
+        //TODO add a turn summary instead of just the last roll
+        updateTxt.setText(gameState.getLastMsg());
         String ore = "Ore: " + gameState.playerOre[playerNum];
         oreText.setText(ore);
         String wheat = "Wheat: " + gameState.playerWheat[playerNum];
@@ -271,43 +308,56 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 die2.setImageResource(R.mipmap.face6);
                 break;
         }
-
         //will restore trading button when trading actually works
-        tradeButton.setEnabled(false);
-        tradeButton.setTextColor(0xFF000000);
-        if (gameState.playerWood[playerNum] < 1 || gameState.playerBrick[playerNum] < 1) {
-            roadButton.setEnabled(false);
-            roadButton.setTextColor(0xFF000000);
-        } else {
-            roadButton.setEnabled(true);
-            roadButton.setTextColor(0xFFFFFFFF);
-        }
-        if (gameState.playerBrick[playerNum] < 1 || gameState.playerWood[playerNum] < 1 || gameState.playerWheat[playerNum] < 1 || gameState.playerSheep[playerNum] < 1) {
-            settlementButton.setEnabled(false);
-            settlementButton.setTextColor(0xFF000000);
-        } else {
-            settlementButton.setEnabled(true);
-            settlementButton.setTextColor(0xFFFFFFFF);
-        }
-        if (gameState.playerOre[playerNum] < 3 || gameState.playerWheat[playerNum] < 2) {
-            cityButton.setEnabled(false);
-            cityButton.setTextColor(0xFF000000);
-        } else {
-            cityButton.setEnabled(true);
-            cityButton.setTextColor(0xFFFFFFFF);
-        }
-        if (gameState.getCanRoll()) {
-            rollButton.setEnabled(true);
-            rollButton.setTextColor(0xFFFFFFFF);
-        } else {
-            rollButton.setEnabled(false);
-            rollButton.setTextColor(0xFF000000);
-        }
-    }
-
-    public void updateMsg(String s) {
-        updateTxt.setText(s);
-    }
+       if (gameState.getPlayerUp() == playerNum) {
+           endTurnButton.setEnabled(true);
+           endTurnButton.setTextColor(0xFFFFFFFF);
+           tradeButton.setEnabled(false);
+           tradeButton.setTextColor(0xFF000000);
+           if (gameState.playerWood[playerNum] < 1 || gameState.playerBrick[playerNum] < 1) {
+               roadButton.setEnabled(false);
+               roadButton.setTextColor(0xFF000000);
+           } else {
+               roadButton.setEnabled(true);
+               roadButton.setTextColor(0xFFFFFFFF);
+           }
+           if (gameState.playerBrick[playerNum] < 1 || gameState.playerWood[playerNum] < 1 || gameState.playerWheat[playerNum] < 1 || gameState.playerSheep[playerNum] < 1) {
+               settlementButton.setEnabled(false);
+               settlementButton.setTextColor(0xFF000000);
+           } else {
+               settlementButton.setEnabled(true);
+               settlementButton.setTextColor(0xFFFFFFFF);
+           }
+           if (gameState.playerOre[playerNum] < 3 || gameState.playerWheat[playerNum] < 2) {
+               cityButton.setEnabled(false);
+               cityButton.setTextColor(0xFF000000);
+           } else {
+               cityButton.setEnabled(true);
+               cityButton.setTextColor(0xFFFFFFFF);
+           }
+           if (gameState.getCanRoll()) {
+               rollButton.setEnabled(true);
+               rollButton.setTextColor(0xFFFFFFFF);
+           } else {
+               rollButton.setEnabled(false);
+               rollButton.setTextColor(0xFF000000);
+           }
+       } else {
+           roadButton.setEnabled(false);
+           roadButton.setTextColor(0xFF000000);
+           rollButton.setEnabled(false);
+           rollButton.setTextColor(0xFF000000);
+           cityButton.setEnabled(false);
+           cityButton.setTextColor(0xFF000000);
+           settlementButton.setEnabled(false);
+           settlementButton.setTextColor(0xFF000000);
+           tradeButton.setEnabled(false);
+           tradeButton.setTextColor(0xFF000000);
+           endTurnButton.setEnabled(false);
+           endTurnButton.setTextColor(0xFF000000);
+       }
+       view.invalidate();
+    }//updateUI
 
     public CatanGameState getGameState() {
         return gameState;

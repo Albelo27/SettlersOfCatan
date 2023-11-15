@@ -2,6 +2,7 @@ package com.example.settlersofcatan;
 
 import android.util.Log;
 
+import com.example.actions.BuildAction;
 import com.example.actions.PlayDCAction;
 import com.example.actions.RollDiceAction;
 import com.example.actions.SendPlayerTradeAction;
@@ -54,7 +55,7 @@ public class CatanLocalGame extends LocalGame {
         return null;
     }
 
-    @Override//TODO pass the player that actually did the action
+    @Override
     protected boolean makeMove(GameAction action) {
         int player = gameState.getPlayerUp();
         int playerID = this.getPlayerIdx(action.getPlayer());

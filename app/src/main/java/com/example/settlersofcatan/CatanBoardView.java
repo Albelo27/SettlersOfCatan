@@ -92,13 +92,13 @@ public class CatanBoardView extends SurfaceView {
                 }
             }
         }
-        if (gs != null) {
+        if (gs != null) {//TODO make radius and square variables so its easier to alter the UI
            for (int a = 0; a < gs.data.length; a++) {
                for (Building b : gs.data[a].buildings) {
-                   if (b.getName() == "settlement") {
-                       canvas.drawCircle(b.getX(), b.getY(), 13, playerPaint[a]);
+                   if (b.getName().equals("settlement")) {
+                       canvas.drawCircle(b.getX(), b.getY(), 10, playerPaint[a]);
                    } else {
-                       canvas.drawRect(b.getX()-5, b.getY()-5, b.getX()+5, b.getY()+5, playerPaint[a]);
+                       canvas.drawRect(b.getX()-10, b.getY()-10, b.getX()+10, b.getY()+10, playerPaint[a]);
                    }
                }
                for (float[] f : gs.data[a].roads) {
