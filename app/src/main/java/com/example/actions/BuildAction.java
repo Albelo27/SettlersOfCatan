@@ -1,10 +1,11 @@
-package com.example.settlersofcatan;
+package com.example.actions;
 
 import com.example.game.GameFramework.actionMessage.GameAction;
 import com.example.game.GameFramework.players.GamePlayer;
 
 public class BuildAction extends GameAction {
 
+    private GamePlayer gamePlayer;
     private String building;
     private float X;
     private float Y;
@@ -22,6 +23,10 @@ public class BuildAction extends GameAction {
     public BuildAction(GamePlayer player, String  building, float X, float Y) {
         super(player);
         this.building = building;
+        this.gamePlayer = player;
+        this.X = X;
+        this.Y = Y;
+
     }
     /**
      * constructor for GameAction when building a road
@@ -32,8 +37,19 @@ public class BuildAction extends GameAction {
      * @param Z z coordinate of the road
      * @param Q q coordinate of the road
      */
-    public BuildAction(GamePlayer player, String building, float X, float Y, float Z, float Q) {super(player); }
+    public BuildAction(GamePlayer player, String building, float X, float Y, float Z, float Q) {
+        super(player);
+        this.building = building;
+        this.gamePlayer = player;
+        this.X = X;
+        this.Y = Y;
+        this.Z = Z;
+        this.Q = Q;
+    }
 
+    public GamePlayer getGamePlayer() {
+        return gamePlayer;
+    }
     public String getBuilding() {
         return building;
     }
