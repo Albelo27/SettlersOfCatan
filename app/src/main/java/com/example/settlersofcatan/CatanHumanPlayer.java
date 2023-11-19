@@ -43,6 +43,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
      */
     //TODO add above 'more functionality'
     private int classState = 0;
+    private String state = "";
     private Button tradeButton;
     private Button rollButton;
     private Button endTurnButton;
@@ -66,9 +67,11 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     private TextView p1KC;
     private TextView p2vp;
     private TextView p2KC;
+    private TextView stateView;
     private CatanGameState gameState;
     CatanBoardView view;
-    DoNotTouch c = new DoNotTouch();
+    private final DoNotTouch c = new DoNotTouch();
+    private final float[] vl = c.vertexList;
     float[] roadCords = new float[4];
     final int ORE = 0;
     final int WHEAT = 1;
@@ -125,6 +128,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         p1KC = theActivity.findViewById(R.id.P1KnightCount);
         p2vp = theActivity.findViewById(R.id.P2VP);
         p2KC = theActivity.findViewById(R.id.P2KnightCount);
+        stateView = theActivity.findViewById(R.id.stateTextView);
         die1 = theActivity.findViewById(R.id.die1);
         die2 = theActivity.findViewById(R.id.die2);
         updateTxt = theActivity.findViewById(R.id.updateText);
@@ -159,7 +163,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     }//setAsGui
 
     @Override
-    public void onClick(View view) {//TODO add and indicator for classState to the UI
+    public void onClick(View view) {
         if (view.equals(tradeButton)) { //trade
             //TODO implement trading
         } else if (view.equals(rollButton) ) { //roll
@@ -170,13 +174,10 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
             game.sendAction(new EndTurnAction(this));
         } else if (view.equals(roadButton)) { //road
             if (classState == 3) {
-                Log.e("HumanPlayer", Integer.toString(classState));
                 classState = 0;
             } else if (classState == 4) {
-                Log.e("HumanPlayer", Integer.toString(classState));
                 classState = 0;
             } else {
-                Log.e("HumanPlayer", Integer.toString(classState));
                 classState = 3;
             }
         } else if (view.equals(settlementButton)) { //settlement
@@ -203,20 +204,20 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
 //        } else if (view.equals(brickButton)) { //brick
 //            Log.e("HIIIIII :3", "brick");
 //        }
+
+        updateUI();
     }//onclick
 
     @Override
     public boolean onTouch(View v, MotionEvent motionEvent) {
         float xPos = -1;
         float yPos = -1;
-        for (int x = 0; x < c.X.length; x++) {
-           if (motionEvent.getX() > c.X[x]) {
-                xPos = c.X[x];
-           }
-        }
-        for (int y = 1; y < c.Y.length; y += 2) {
-            if (motionEvent.getY() > c.Y[y]) {
-                yPos = c.Y[y];
+        for (int l = 0; l < vl.length; l+=2) {
+            if (motionEvent.getX() > vl[l] - (view.radius * 2) && motionEvent.getX() < vl[l] + (view.radius * 2)) {
+                xPos = vl[l];
+            }
+            if (motionEvent.getY() > vl[l+1] - (view.radius * 2) && motionEvent.getY() < vl[l+1] + (view.radius * 2)) {
+                yPos = vl[l+1];
             }
         }
         if (v.equals(this.view)) {
@@ -236,6 +237,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 roadCords[2] = xPos;
                 roadCords[3] = yPos;
                 game.sendAction(new BuildAction(this, "road", roadCords[0], roadCords[1], roadCords[2], roadCords[3]));
+                classState = 0;
             }
             updateUI();
         }
@@ -342,7 +344,24 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                rollButton.setEnabled(false);
                rollButton.setTextColor(0xFF000000);
            }
+           switch (classState) {
+               case 0:
+                   state = "You are idle."; break;
+               case 1:
+                   state = "You are building a settlement!"; break;
+               case 2:
+                   state = "You are upgrading to a city!"; break;
+               case 3:
+                   state = "Choose your first road point!"; break;
+               case 4:
+                   state = "choose your second road point!"; break;
+               default:
+                   state = "";
+           }
+           stateView.setText(state);
        } else {
+           String cat = "Player " + Integer.toString(gameState.getPlayerUp() + 1) + " is playing";
+           updateTxt.setText(cat);
            roadButton.setEnabled(false);
            roadButton.setTextColor(0xFF000000);
            rollButton.setEnabled(false);
