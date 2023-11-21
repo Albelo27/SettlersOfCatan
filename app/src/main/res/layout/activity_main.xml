@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -254,36 +256,43 @@
             android:id="@+id/buttonLayout"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <Button
                 android:id="@+id/tradeButton"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#3B0459"
-                android:textColor="#FFFFFF"
-                android:text="@string/tradeTitle" />
+                android:text="@string/tradeTitle"
+                android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/rollButton"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#045906"
-                android:textColor="#FFFFFF"
-                android:text="@string/roll" />
+                android:text="@string/roll"
+                android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/endButton"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#870404"
-                android:textColor="#FFFFFF"
-                android:text="@string/end" />
+                android:text="@string/end"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/updateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -296,6 +305,7 @@
                     android:id="@+id/diceLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:orientation="vertical"
                     android:paddingStart="5sp"
                     android:paddingEnd="5sp">
@@ -311,12 +321,16 @@
                     <ImageView
                         android:id="@+id/die1"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:srcCompat="@mipmap/face1" />
 
                     <ImageView
                         android:id="@+id/die2"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        tools:srcCompat="@mipmap/face6" />
 
                 </LinearLayout>
 
@@ -334,45 +348,39 @@
                         android:textColor="#000000"
                         android:textSize="15sp" />
 
-                    <TextView
-                        android:id="@+id/oreText"
-                        android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/oreButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="Button" />
 
-                    <TextView
-                        android:id="@+id/wheatText"
-                        android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/wheatButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="Button" />
 
-                    <TextView
-                        android:id="@+id/brickText"
-                        android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/sheepButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="Button" />
 
-                    <TextView
-                        android:id="@+id/sheepText"
-                        android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/woodButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="Button" />
 
-                    <TextView
-                        android:id="@+id/woodText"
-                        android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/brickButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="Button" />
 
                 </LinearLayout>
 
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/updateText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
 
         </LinearLayout>
 

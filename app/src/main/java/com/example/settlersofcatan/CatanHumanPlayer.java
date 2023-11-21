@@ -1,5 +1,8 @@
 package com.example.settlersofcatan;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,8 +17,12 @@ import com.example.game.GameFramework.GameMainActivity;
 import com.example.game.GameFramework.actionMessage.EndTurnAction;
 import com.example.game.GameFramework.infoMessage.GameInfo;
 import com.example.game.GameFramework.players.GameHumanPlayer;
+import com.example.util.Building;
 import com.example.util.DoNotTouch;
 import com.example.util.Hex;
+import com.example.util.Road;
+
+import java.util.ArrayList;
 
 /**
  * CatanHumanPlayer maintains the GUI as well as interprets the moves and interactions by a local user
@@ -34,14 +41,18 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     private GameMainActivity theActivity;
     /*
     class state represents what the class is doing for UI purposes:
+    -1 test state
     0 nothing
     1 building settlement
     2 building city
     3 building road pt1
     4 building road pt2
+    5 selecting a knight location
+    6 selecting a resource for DC
+    7 rolled a 7 (Oh no!!)
     more coming soon with more functionality in the beta release
      */
-    //TODO add above 'more functionality'
+    //TODO add 5 and 6 functionality
     private int classState = 0;
     private String state = "";
     private Button tradeButton;
@@ -50,19 +61,14 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     private Button roadButton;
     private Button settlementButton;
     private Button cityButton;
-    private ImageButton wheatButton;
-    private ImageButton woodButton;
-    private ImageButton sheepButton;
-    private ImageButton brickButton;
-    private ImageButton oreButton;
     private ImageView die1;
     private ImageView die2;
     private TextView updateTxt;
-    private TextView oreText;
-    private TextView wheatText;
-    private TextView sheepText;
-    private TextView woodText;
-    private TextView brickText;
+    private Button oreText;
+    private Button wheatText;
+    private Button sheepText;
+    private Button woodText;
+    private Button brickText;
     private TextView p1vp;
     private TextView p1KC;
     private TextView p2vp;
@@ -72,6 +78,8 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     CatanBoardView view;
     private final DoNotTouch c = new DoNotTouch();
     private final float[] vl = c.vertexList;
+    private ArrayList<Float> xHitCords = new ArrayList<Float>();
+    private ArrayList<Float> yHitCords = new ArrayList<Float>();
     float[] roadCords = new float[4];
     final int ORE = 0;
     final int WHEAT = 1;
@@ -143,22 +151,22 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
 //        sheepButton = theActivity.findViewById(R.id.sheepButton4);
 //        brickButton = theActivity.findViewById(R.id.brickButton3);
 //        woodButton = theActivity.findViewById(R.id.woodButton5);
-        oreText = theActivity.findViewById(R.id.oreText);
-        wheatText = theActivity.findViewById(R.id.wheatText);
-        sheepText = theActivity.findViewById(R.id.sheepText);
-        brickText = theActivity.findViewById(R.id.brickText);
-        woodText = theActivity.findViewById(R.id.woodText);
+        oreText = theActivity.findViewById(R.id.oreButton);
+        wheatText = theActivity.findViewById(R.id.wheatButton);
+        sheepText = theActivity.findViewById(R.id.sheepButton);
+        brickText = theActivity.findViewById(R.id.brickButton);
+        woodText = theActivity.findViewById(R.id.woodButton);
         tradeButton.setOnClickListener(this);
         rollButton.setOnClickListener(this);
         endTurnButton.setOnClickListener(this);
         roadButton.setOnClickListener(this);
         settlementButton.setOnClickListener(this);
         cityButton.setOnClickListener(this);
-//        wheatButton.setOnClickListener(this);
-//        oreButton.setOnClickListener(this);
-//        sheepButton.setOnClickListener(this);
-//        brickButton.setOnClickListener(this);
-//        woodButton.setOnClickListener(this);
+        oreText.setOnClickListener(this);
+        wheatText.setOnClickListener(this);
+        sheepText.setOnClickListener(this);
+        brickText.setOnClickListener(this);
+        woodText.setOnClickListener(this);
         view.invalidate();//double check the GUI is gonna innit correctly
     }//setAsGui
 
@@ -171,6 +179,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 game.sendAction(new RollDiceAction(this));
             }
         } else if (view.equals(endTurnButton)) { //end turn
+            gameState.resetLastMsg();
             game.sendAction(new EndTurnAction(this));
         } else if (view.equals(roadButton)) { //road
             if (classState == 3) {
@@ -193,18 +202,19 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 classState = 2;
             }
         }
-//        else if (view.equals(oreButton)) { //ore
-//            Log.e("HIIIIII :3", "ore");
-//        } else if (view.equals(wheatButton)) { //wheat
-//            Log.e("HIIIIII :3", "wheat");
-//        } else if (view.equals(sheepButton)) { //sheep
-//            Log.e("HIIIIII :3", "sheep");
-//        } else if (view.equals(woodButton)) { //wood
-//            Log.e("HIIIIII :3", "wood");
-//        } else if (view.equals(brickButton)) { //brick
-//            Log.e("HIIIIII :3", "brick");
-//        }
-
+        if (classState == 7) {
+            if (view.equals(oreText)) {
+                gameState.setPlayerOre(gameState.playerOre[playerNum]-1, playerNum);
+            } else if (view.equals(wheatText)) {
+                gameState.setPlayerWheat(gameState.playerWheat[playerNum]-1, playerNum);
+            }else if (view.equals(sheepText)) {
+                gameState.setPlayerSheep(gameState.playerSheep[playerNum]-1, playerNum);
+            }else if (view.equals(woodText)) {
+                gameState.setPlayerWood(gameState.playerWood[playerNum]-1, playerNum);
+            }else if (view.equals(brickText)) {
+                gameState.setPlayerBrick(gameState.playerBrick[playerNum]-1, playerNum);
+            }
+        }
         updateUI();
     }//onclick
 
@@ -212,6 +222,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     public boolean onTouch(View v, MotionEvent motionEvent) {
         float xPos = -1;
         float yPos = -1;
+        boolean goodClick = false;
         for (int l = 0; l < vl.length; l+=2) {
             if (motionEvent.getX() > vl[l] - (view.radius * 2) && motionEvent.getX() < vl[l] + (view.radius * 2)) {
                 xPos = vl[l];
@@ -220,20 +231,24 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 yPos = vl[l+1];
             }
         }
-        if (v.equals(this.view)) {
+        for (int q = 0; q < c.vertexList.length; q++) {
+            if (xPos == c.vertexList[q] && yPos == c.vertexList[q + 1]) {
+                goodClick = true;
+                break;
+            }
+        }
+        if (v.equals(this.view) && goodClick) {
             if (classState == 0) {
                 return false;
-            } else if (classState == 1) {
+            }  else if (classState == 1) {
                 game.sendAction(new BuildAction(this, "settlement", xPos, yPos));
             } else if (classState == 2) {
                 game.sendAction(new BuildAction(this, "city", xPos, yPos));
             } else if (classState == 3) {
-                Log.e("human player", "road pt1");
                 roadCords[0] = xPos;
                 roadCords[1] = yPos;
                 classState = 4;
             } else if (classState == 4) {
-                Log.e("humanPlayer", "road pt2");
                 roadCords[2] = xPos;
                 roadCords[3] = yPos;
                 game.sendAction(new BuildAction(this, "road", roadCords[0], roadCords[1], roadCords[2], roadCords[3]));
@@ -264,58 +279,76 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         String p2points = "VP: " + gameState.playerVPs[1];
         p2vp.setText(p2points);
         String p2knight = "KC: " + gameState.playerKCs[1];
-        switch(gameState.getLastRoll()) {
+        switch (gameState.lastRoll1) {
+            case 1:
+                die1.setImageResource(R.mipmap.face1); break;
             case 2:
-                die1.setImageResource(R.mipmap.face1);
-                die2.setImageResource(R.mipmap.face1);
-                break;
+                die1.setImageResource(R.mipmap.face2); break;
             case 3:
-                die1.setImageResource(R.mipmap.face1);
-                die2.setImageResource(R.mipmap.face2);
-                break;
+                die1.setImageResource(R.mipmap.face3); break;
             case 4:
-                die1.setImageResource(R.mipmap.face2);
-                die2.setImageResource(R.mipmap.face2);
-                break;
+                die1.setImageResource(R.mipmap.face4); break;
             case 5:
-                die1.setImageResource(R.mipmap.face2);
-                die2.setImageResource(R.mipmap.face3);
-                break;
+                die1.setImageResource(R.mipmap.face5); break;
             case 6:
-                die1.setImageResource(R.mipmap.face3);
-                die2.setImageResource(R.mipmap.face3);
-                break;
-            case 7:
-                die1.setImageResource(R.mipmap.face3);
-                die2.setImageResource(R.mipmap.face4);
-                break;
-            case 8:
-                die1.setImageResource(R.mipmap.face4);
-                die2.setImageResource(R.mipmap.face4);
-                break;
-            case 9:
-                die1.setImageResource(R.mipmap.face4);
-                die2.setImageResource(R.mipmap.face5);
-                break;
-            case 10:
-                die1.setImageResource(R.mipmap.face5);
-                die2.setImageResource(R.mipmap.face5);
-                break;
-            case 11:
-                die1.setImageResource(R.mipmap.face5);
-                die2.setImageResource(R.mipmap.face6);
-                break;
-            case 12:
-                die1.setImageResource(R.mipmap.face6);
-                die2.setImageResource(R.mipmap.face6);
-                break;
+                die1.setImageResource(R.mipmap.face6); break;
         }
-        //will restore trading button when trading actually works
-       if (gameState.getPlayerUp() == playerNum) {
+        switch (gameState.lastRoll2) {
+            case 1:
+                die2.setImageResource(R.mipmap.face1); break;
+            case 2:
+                die2.setImageResource(R.mipmap.face2); break;
+            case 3:
+                die2.setImageResource(R.mipmap.face3); break;
+            case 4:
+                die2.setImageResource(R.mipmap.face4); break;
+            case 5:
+                die2.setImageResource(R.mipmap.face5); break;
+            case 6:
+                die2.setImageResource(R.mipmap.face6); break;
+        }
+        if (classState == 7) {
+            rollButton.setEnabled(false);
+            rollButton.setTextColor(0xFF000000);
+            tradeButton.setEnabled(false);
+            tradeButton.setTextColor(0xFF000000);
+            settlementButton.setEnabled(false);
+            settlementButton.setTextColor(0xFF000000);
+            cityButton.setEnabled(false);
+            cityButton.setTextColor(0xFF000000);
+            roadButton.setEnabled(false);
+            roadButton.setTextColor(0xFF000000);
+
+            oreText.setEnabled(true);
+            wheatText.setEnabled(true);
+            sheepText.setEnabled(true);
+            woodText.setEnabled(true);
+            brickText.setEnabled(true);
+            int resSum = gameState.playerOre[playerNum] + gameState.playerWheat[playerNum] +gameState.playerSheep[playerNum] +gameState.playerWood[playerNum] +gameState.playerBrick[playerNum];
+            if (resSum > 7) {
+                endTurnButton.setEnabled(false);
+                endTurnButton.setTextColor(0xFF000000);
+                state = "You rolled a 7, discard resources until there are 7 or fewer in your hand.";
+            } else {
+                endTurnButton.setEnabled(true);
+                endTurnButton.setTextColor(0xFFFFFFFF);
+                oreText.setEnabled(false);
+                wheatText.setEnabled(false);
+                sheepText.setEnabled(false);
+                woodText.setEnabled(false);
+                brickText.setEnabled(false);
+                classState = 0;
+            }
+        } else if (gameState.getPlayerUp() == playerNum) {
            endTurnButton.setEnabled(true);
            endTurnButton.setTextColor(0xFFFFFFFF);
            tradeButton.setEnabled(false);
            tradeButton.setTextColor(0xFF000000);
+            oreText.setEnabled(false);
+            wheatText.setEnabled(false);
+            sheepText.setEnabled(false);
+            woodText.setEnabled(false);
+            brickText.setEnabled(false);
            if (gameState.playerWood[playerNum] < 1 || gameState.playerBrick[playerNum] < 1) {
                roadButton.setEnabled(false);
                roadButton.setTextColor(0xFF000000);
@@ -344,7 +377,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                rollButton.setEnabled(false);
                rollButton.setTextColor(0xFF000000);
            }
-           switch (classState) {
+           switch (classState) {//TODO add other class states
                case 0:
                    state = "You are idle."; break;
                case 1:
@@ -355,11 +388,13 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                    state = "Choose your first road point!"; break;
                case 4:
                    state = "choose your second road point!"; break;
+               case 7:
+                   state = "Discard resources until your hand total is <= 7";
                default:
                    state = "";
            }
            stateView.setText(state);
-       } else {
+       } else {//not your turn
            String cat = "Player " + Integer.toString(gameState.getPlayerUp() + 1) + " is playing";
            updateTxt.setText(cat);
            roadButton.setEnabled(false);
@@ -375,16 +410,47 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
            endTurnButton.setEnabled(false);
            endTurnButton.setTextColor(0xFF000000);
        }
+        view.setHDraw(true);//don't change this
+       xHitCords.clear();
+       yHitCords.clear();
+       view.setHitBoxVals(xHitCords, yHitCords);
+       highlights();
        view.invalidate();
     }//updateUI
 
+    public void highlights() {
+        ArrayList<Building> buildings = gameState.data[this.playerNum].buildings;
+            switch(classState) {
+                case 1:
+                    for (Road test : getGameState().data[this.playerNum].roads) {
+                        if (getGameState().checkLegalSettlement(this.playerNum, test.x, test.y) || getGameState().checkLegalSettlement(this.playerNum, test.z, test.q)) {
+                            xHitCords.add(test.x);
+                            yHitCords.add(test.y);
+                        }
+                    }
+                    break;
+                case 2:
+                    for (int a = 0; a < buildings.size(); a++) {
+                        if (buildings.get(a).getName().equals("settlement")) {
+                            xHitCords.add(buildings.get(a).getX());
+                            yHitCords.add(buildings.get(a).getY());
+                        }
+                    }
+                    break;
+                default:
+                    view.setHDraw(false);
+                break;
+            }
+            view.setHitBoxVals(xHitCords, yHitCords);
+    }
+
+    //getters and setters
     public CatanGameState getGameState() {
         return gameState;
     }
-
     public GameMainActivity getTheActivity() {
         return theActivity;
     }
-
+    public void setClassState (int newState) {classState = newState;}
 
 }//end of class

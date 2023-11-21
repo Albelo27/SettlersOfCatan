@@ -1,15 +1,15 @@
 package com.example.settlersofcatan;
 
 import android.util.Log;
+import android.view.inputmethod.InsertGesture;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 import com.example.util.Building;
 import com.example.util.DoNotTouch;
 import com.example.util.Hex;
-import com.example.util.Pair;
 import com.example.util.PlayerData;
+import com.example.util.Road;
 
 /**
  * CatanGameState is the GameState that controls the internal state of the Catan board, player hands and player score
@@ -27,6 +27,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     Development Card constants
        Players will have an array of Integers that represent their Development cards
     */
+    int loops = 0;
     final int MONOPOLY = 0;
     final int KNIGHT = 1;
     final int ROAD_BUILDER = 2;
@@ -46,6 +47,8 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     private int playerUp;
     //records the most recent roll made
     private int lastRoll;
+    public int lastRoll1;
+    public int lastRoll2;
     //can the player who's turn it is roll the dice
     private boolean canRoll;
     //player VP Counts
@@ -67,7 +70,8 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     int[] playerWood = new int[4];
     PlayerData[] data = new PlayerData[4];
     DoNotTouch c = new DoNotTouch();
-    private String lastMsg = "";
+    ArrayList<Road> checkedRoads = new ArrayList<Road>();
+    private String lastMsg;
     private int robberPos;
     //these are the hard-coded values of the hexagons
     Hex[] boardValues = {//first row
@@ -89,6 +93,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         lastRoll = 7;//most common roll, placeholder for pre-setup
         canRoll = true;
         robberPos = 9;//based on the pre-set board we are using for alpha release
+        lastMsg = "";
         for (int k = 0; k < 4; k++) {//all of these arrays are 4 in length
             playerVPs[k] = 2;//players start with two settlements on the board
             playerKCs[k] = 0;
@@ -100,23 +105,25 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerWood[k] = 0;
             data[k] = new PlayerData(); //create a new class that contains the player's roads, cards and buildings
         }
-        lastMsg = "Let the game Begin!";
-        //TODO this the innitial fixed starting position for infrastructure and should be made variable for beta release
-        playerWheat[0] = 1;
-        playerBrick[0] = 1;
-        playerWood[0] = 1;
+        //TODO this the initial fixed starting position for infrastructure and should be made variable for beta release
+        playerWheat[0] = 10;
+        playerBrick[0] = 10;
+        playerWood[0] = 10;
+        playerOre[0] = 10;
+        playerSheep[0] = 10;
         //TODO set this to the proper innit for class
         playerWood[1] = 1;
         playerBrick[1] = 1;
         playerOre[1] = 1;
-        data[0].buildings.add(new Building("settlement", c.X[3], c.Y[4], findAdjacents(c.X[3], c.Y[4])));
-        data[0].buildings.add(new Building("settlement", c.X[8], c.Y[6], findAdjacents(c.X[8], c.Y[6])));
-        data[0].roads.add(new float[] {c.X[8], c.Y[6], c.X[8], c.Y[5]});
-        data[0].roads.add(new float[] {c.X[3], c.Y[4], c.X[2], c.Y[5]});
-        data[1].buildings.add(new Building("settlement", c.X[3], c.Y[8], findAdjacents(c.X[3], c.Y[8])));
-        data[1].buildings.add(new Building("settlement", c.X[7], c.Y[8], findAdjacents(c.X[7], c.Y[8])));
-        data[1].roads.add(new float[] {c.X[3], c.Y[8], c.X[4], c.Y[9]});
-        data[1].roads.add(new float[] {c.X[7], c.Y[8], c.X[7], c.Y[7]});
+        data[0].buildings.add(new Building("settlement", c.X[3], c.Y[4], findAdjacent(c.X[3], c.Y[4])));
+        data[0].buildings.add(new Building("settlement", c.X[8], c.Y[6], findAdjacent(c.X[8], c.Y[6])));
+        data[0].roads.add(new Road(c.X[8], c.Y[6], c.X[8], c.Y[5]));
+        data[0].roads.add(new Road(c.X[7], c.Y[4], c.X[8], c.Y[5]));
+        data[0].roads.add(new Road(c.X[3], c.Y[4], c.X[2], c.Y[5]));
+        data[1].buildings.add(new Building("settlement", c.X[3], c.Y[8], findAdjacent(c.X[3], c.Y[8])));
+        data[1].buildings.add(new Building("settlement", c.X[7], c.Y[8], findAdjacent(c.X[7], c.Y[8])));
+        data[1].roads.add(new Road(c.X[3], c.Y[8], c.X[4], c.Y[9]));
+        data[1].roads.add(new Road(c.X[7], c.Y[8], c.X[7], c.Y[7]));
     }
     /**
      * Creates a deep copy of the game State you pass into the function
@@ -127,9 +134,12 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         //copy basic variables
         this.playerUp = copy.playerUp;
         this.lastRoll = copy.lastRoll;
+        this.lastRoll1 = copy.lastRoll1;
+        this.lastRoll2 = copy.lastRoll2;
         this.canRoll = copy.canRoll;
         this.robberPos = copy.robberPos;
         this.lastMsg = copy.lastMsg;
+        this.c = copy.c;
         for (int k = 0; k < 4; k++) {//4-long arrays
             this.playerVPs[k] = copy.playerVPs[k];
             this.playerKCs[k] = copy.playerKCs[k];
@@ -154,14 +164,14 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the player rolled the dice and update the gameState, false if the player rolled out of turn
      */
     public boolean rollDice(int playerId) {
-        //TODO make the dice display the actual roll
         if (playerId == playerUp && canRoll) {
+            lastRoll1 = (int)(Math.ceil(Math.random() * 6));
+            lastRoll2 = (int)(Math.ceil(Math.random() * 6));
             //roll two dice to attempt to mimic the real odds of rolling two dice, eg. 7 is more common than 11
-            lastRoll = (int)(Math.ceil(Math.random() * 6) + Math.ceil(Math.random()*6));
-            Log.e("GameState", Integer.toString(lastRoll));
+            lastRoll = lastRoll1 + lastRoll2;
             canRoll = false;
             int placeholder = playerId + 1;
-            setLastMsg("Player " + placeholder + " rolled a " + lastRoll + "!");
+            lastMsg = "Player " + placeholder + " rolled a " + lastRoll + "!\n";
             return true;
         } else {
             return false;
@@ -190,6 +200,12 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         }
     }
 
+    /**
+     * Gives the player specified the resource identified, either 1 or two
+     * @param playerId the player ot receive the resource
+     * @param resID the resource being received
+     * @param is2 true if the player should receive 2, false if the player should receive 1;
+     */
     public void giveRes(int playerId, int resID, boolean is2) {
         switch(resID) {
             case WHEAT:
@@ -222,28 +238,31 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     public boolean buildRoad(int playerID, float X, float Y, float Z, float Q) {
         if(playerID != playerUp) return false;
         if(playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
-            if (checkLegalRoad(playerID, X, Y, Z, Q)) {
+            Road rn = new Road(X, Y, Z, Q);
+            if (checkLegalRoad(playerID, rn)) {
                 playerRCs[playerID]++;
                 playerBrick[playerID]--;
                 playerWood[playerID]--;
-                data[playerID].roads.add(new float[]{X, Y, Z, Q});
+                data[playerID].roads.add(rn);
                 return true;
             }
         }
         return false;
     }
 
-    public boolean checkLegalRoad(int playerID, float X, float Y, float Z, float Q) {
+    public boolean checkLegalRoad(int playerID, Road road) {
         for (Building b : data[playerID].buildings) {
-            if ((b.getX() == X && b.getY() == Y)||(b.getX() == Z && b.getY() == Q)) {
+            if ((b.getX() == road.x && b.getY() == road.y)||(b.getX() == road.z && b.getY() == road.q)) {
                 return true;
             }
         }
-        for (float[] fl : data[playerID].roads) {
-            if ((fl[0] == X && fl[1] == Y)||(fl[2] == X && fl[3] == Y)) {
+        for (Road r : data[playerID].roads) {
+            if (!r.equals(road)) {
+             if ((r.x == road.x && r.y == road.y) || (r.x == road.z && r.y == road.q)) {
                 return true;
-            } else if ((fl[0] == Z && fl[1] == Q)||(fl[2] == Z && fl[3] == Q)) {
+             } else if ((r.z == road.x && r.q == road.y) || (r.z == road.z && r.q == road.q)) {
                 return true;
+             }
             }
         }
         return false;
@@ -258,35 +277,77 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      */
     public boolean buildSettlement(int playerID, float X, float Y) {
         if(playerID != playerUp) return false;
-
         if(playerWheat[playerID] >= 1 && playerSheep[playerID] >= 1 && playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
-            Log.e("gameState", "buildSettlement");
             if (checkLegalSettlement(playerID, X, Y)) {
-                Log.e("GameState", "Legal Settlement");
                 playerWheat[playerID]--;
                 playerSheep[playerID]--;
                 playerBrick[playerID]--;
                 playerWood[playerID]--;
                 playerVPs[playerID]++;
-                data[playerID].buildings.add(new Building("settlement", X, Y,findAdjacents(X, Y)));
+                data[playerID].buildings.add(new Building("settlement", X, Y, findAdjacent(X, Y)));
+                return true;
             }
-            return true;
         }
         return false;
     }
 
     public boolean checkLegalSettlement(int playerID, float x, float y) {
-        //TODO make this check if there are two roads instead of just one
-        for (float[] f : data[playerID].roads) {
-            String out = "x " + x + " y " + y + " f[0] " + f[0] + " f[1] " + f[1] + " f[2] " + f[2] + " f[3] " + f[3];
-            Log.e("checkLegal", out);
-            if (f[0] == x && f[1] == y) {
-                return true;
-            } else if (f[2] == x && f[3] == y) {
+        ArrayList<Road> rlist = new ArrayList<Road>();
+//        checkedRoads.clear();
+        for (Building b : data[playerID].buildings) {
+            if (b.getX() == x && b.getY() == y) {
+                return false;
+            }
+            if ((Math.abs((c.findXIndx(b.getX()) - c.findXIndx(x))) <= 1) && (Math.abs(c.findYIndx(b.getY()) - c.findYIndx(y)) <= 1)) {
+                Log.e("gameState","too close to another settlement");
+                return false;
+            }
+        }
+        for (Road r : data[playerID].roads) {
+            if ((x == r.x && y == r.y) || (x == r.z && y == r.q)) {
+                rlist.add(r);
+            }
+        }
+        for (Road r : rlist) {
+            int t = checkRoadLength(playerID, r, 1);
+            if (t >= 2) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * checks for a number of roads recursively based on parameters
+     * @param playerID the owner of the roads
+     * @param startRoad the road being checked for it's position in the current chain
+     * @param l the length that is passed recursively, when starting to check roads this should always be passed as one
+     * @return the number of roads in a row
+     */
+    public int checkRoadLength(int playerID, Road startRoad, int l) {
+        int length = l;
+        for (Road test : checkedRoads) {
+            if (test.equals(startRoad)) {
+                return length;
+            }
+        }
+        for (Road r : data[playerID].roads) {
+            loops++;
+            if ((!r.equals(startRoad))) {
+                if ((startRoad.x == r.x && startRoad.y == r.y) || (startRoad.x == r.z && startRoad.y == r.q)) {
+                    length++;
+                    checkedRoads.add(startRoad);
+                    checkRoadLength(playerID, r, length);
+                } else if ((startRoad.z == r.x && startRoad.q == r.y) || (startRoad.z == r.z && startRoad.q ==r.q)) {
+                    length++;
+                    checkedRoads.add(startRoad);
+                    checkRoadLength(playerID, r, length);
+                }
+            }
+        }
+        checkedRoads.clear();
+        loops = 0;
+        return length;
     }
 
     /**
@@ -303,13 +364,29 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
                 playerVPs[playerID]++;
                 playerWheat[playerID] -= 2;
                 playerOre[playerID] -= 3;
-                data[playerID].buildings.add(new Building("city", X, Y,findAdjacents(X, Y)));
+                data[playerID].buildings.add(new Building("city", X, Y, findAdjacent(X, Y)));
+                Building demo = null;
+                for (Building b : data[playerID].buildings) {
+                    if (b.getName().equals("settlement") && b.getX() == X && b.getY() == Y) {
+                       demo = b;
+                    }
+                }
+                if (demo != null) {
+                    data[playerID].buildings.remove(demo);
+                }
                 return true;
             }
         }
         return false;
     }
 
+    /**
+     * Identifies if a point is a legal city for the player identified
+     * @param playerID the player building the city
+     * @param x the x coordinate of the city
+     * @param y the y coordinate of the city
+     * @return true or false if the point is legal or not
+     */
     public boolean checkLegalCity(int playerID, float x, float y) {
         for (Building b : data[playerID].buildings){
             if (b.getName().equals("settlement")) {
@@ -351,7 +428,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
      */
     public boolean playDC(int playerID, int cardID, int resourceID) {
-        //TODO each development card will have it's own function and they will be called by LocalGame
+        //TODO each development card will have it's own function and they will be called by LocalGame, make sure they each update lastMsg so there is an accurate turn summary
         return false;
     }
 
@@ -362,13 +439,19 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the robber was moved, false if the player moved out of turn
      */
     public boolean moveRobber(int playerID, int newPos) {
-        //TODO update for new Hex object
+        //robber maybe for final
         if(playerID != playerUp) return false;
         setRobberPos(newPos);
         return true;
     }
 
-    public Hex[] findAdjacents(float x, float y) {
+    /**
+     * Finds the three hexes adjacent to the given float coordinates
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @return a Hex array of all adjacent hexes, will be between 2 and 3 hexes
+     */
+    public Hex[] findAdjacent(float x, float y) {
         ArrayList<Hex> list = new ArrayList<Hex>();
         Hex[] output = new Hex[3];
         for (Hex hex : boardValues) {
@@ -381,296 +464,33 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     }
 
     //Getters and Setters
-
-    public PlayerData getData(int playerID) {
-        return data[playerID];
-    }
     public int getPlayerUp() {return playerUp;}
     public void setPlayerUp(int p) {playerUp = p;}
     public boolean getCanRoll() {return canRoll;}
     public void setCanRoll(boolean c) {canRoll = c;}
-    public int getRobberPos() {
-        return robberPos;
-    }
     public void setRobberPos(int newPos) {
         robberPos = newPos;
     }
     public String getLastMsg() {return lastMsg;}
-    public void setLastMsg(String msg) {lastMsg = msg;}
-    public float getPlayer1Color() {
-        return playerColors[0];
-    }
-
-    public float getPlayer2Color() {
-        return playerColors[1];
-    }
-
-    public float getPlayer3Color() {
-        return playerColors[2];
-    }
-
-    public float getPlayer4Color() {
-        return playerColors[3];
-    }
-
-    public int getPlayer1VP() {
-        return playerVPs[0];
-    }
-
-    public void setPlayer1VP(int player1VP) {
-        this.playerVPs[0] = player1VP;
-    }
-
-    public int getPlayer2VP() {
-        return playerVPs[1];
-    }
-
-    public void setPlayer2VP(int player2VP) {
-        this.playerVPs[1] = player2VP;
-    }
-
-    public int getPlayer3VP() {
-        return playerVPs[2];
-    }
-
-    public void setPlayer3VP(int player3VP) {
-        this.playerVPs[2] = player3VP;
-    }
-
-    public int getPlayer4VP() {
-        return playerVPs[3];
-    }
-
-    public void setPlayer4VP(int player4VP) {
-        this.playerVPs[3] = player4VP;
-    }
-
-    public int getPlayer1KC() {
-        return playerKCs[0];
-    }
-
-    public void setPlayer1KC(int player1KC) {
-        this.playerKCs[0] = player1KC;
-    }
-
-    public int getPlayer2KC() {
-        return playerKCs[1];
-    }
-
-    public void setPlayer2KC(int player2KC) {
-        this.playerKCs[1] = player2KC;
-    }
-
-    public int getPlayer3KC() {
-        return playerKCs[2];
-    }
-
-    public void setPlayer3KC(int player3KC) {
-        this.playerKCs[2] = player3KC;
-    }
-
-    public int getPlayer4KC() {
-        return playerKCs[3];
-    }
-
-    public void setPlayer4KC(int player4KC) {
-        this.playerKCs[3] = player4KC;
-    }
-
-    public int getPlayer1RC() {
-        return playerRCs[0];
-    }
-
-    public void setPlayer1RC(int player1RC) {
-        this.playerRCs[0] = player1RC;
-    }
-
-    public int getPlayer2RC() {
-        return playerRCs[1];
-    }
-
-    public void setPlayer2RC(int player2RC) {
-        this.playerRCs[1] = player2RC;
-    }
-
-    public int getPlayer3RC() {
-        return playerRCs[2];
-    }
-
-    public void setPlayer3RC(int player3RC) {
-        this.playerRCs[2] = player3RC;
-    }
-
-    public int getPlayer4RC() {
-        return playerRCs[3];
-    }
-
-    public void setPlayer4RC(int player4RC) {
-        this.playerRCs[3] = player4RC;
-    }
-
-    public int getPlayer1Ore() {
-        return playerOre[0];
-    }
-
-    public void setPlayer1Ore(int player1Ore) {
-        this.playerOre[0] = player1Ore;
-    }
-
-    public int getPlayer2Ore() {
-        return playerOre[1];
-    }
-
-    public void setPlayer2Ore(int player2Ore) {
-        this.playerOre[1] = player2Ore;
-    }
-
-    public int getPlayer3Ore() {
-        return playerOre[2];
-    }
-
-    public void setPlayer3Ore(int player3Ore) {
-        this.playerOre[2] = player3Ore;
-    }
-
-    public int getPlayer4Ore() {
-        return playerOre[3];
-    }
-
-    public void setPlayer4Ore(int player4Ore) {
-        this.playerOre[3] = player4Ore;
-    }
-
-    public int getPlayer1Wheat() {
-        return playerWheat[0];
-    }
-
-    public void setPlayer1Wheat(int player1Wheat) {
-        this.playerWheat[0] = player1Wheat;
-    }
-
-    public int getPlayer2Wheat() {
-        return playerWheat[1];
-    }
-
-    public void setPlayer2Wheat(int player2Wheat) {
-        this.playerWheat[1] = player2Wheat;
-    }
-
-    public int getPlayer3Wheat() {
-        return playerWheat[2];
-    }
-
-    public void setPlayer3Wheat(int player3Wheat) {
-        this.playerWheat[2] = player3Wheat;
-    }
-
-    public int getPlayer4Wheat() {
-        return playerWheat[3];
-    }
-
-    public void setPlayer4Wheat(int player4Wheat) {
-        this.playerWheat[3] = player4Wheat;
-    }
-
-    public int getPlayer1Brick() {
-        return playerBrick[0];
-    }
-
-    public void setPlayer1Brick(int player1Brick) {
-        this.playerBrick[0] = player1Brick;
-    }
-
-    public int getPlayer2Brick() {
-        return playerBrick[1];
-    }
-
-    public void setPlayer2Brick(int player2Brick) {
-        this.playerBrick[1] = player2Brick;
-    }
-
-    public int getPlayer3Brick() {
-        return playerBrick[2];
-    }
-
-    public void setPlayer3Brick(int player3Brick) {
-        this.playerBrick[2] = player3Brick;
-    }
-
-    public int getPlayer4Brick() {
-        return playerBrick[3];
-    }
-
-    public void setPlayer4Brick(int player4Brick) {
-        this.playerBrick[3] = player4Brick;
-    }
-
-    public int getPlayer1Sheep() {
-        return playerSheep[0];
-    }
-
-    public void setPlayer1Sheep(int player1Sheep) {
-        this.playerSheep[0] = player1Sheep;
-    }
-
-    public int getPlayer2Sheep() {
-        return playerSheep[1];
-    }
-
-    public void setPlayer2Sheep(int player2Sheep) {
-        this.playerSheep[1] = player2Sheep;
-    }
-
-    public int getPlayer3Sheep() {
-        return playerSheep[2];
-    }
-
-    public void setPlayer3Sheep(int player3Sheep) {
-        this.playerSheep[2] = player3Sheep;
-    }
-
-    public int getPlayer4Sheep() {
-        return playerSheep[3];
-    }
-
-    public void setPlayer4Sheep(int player4Sheep) {
-        this.playerSheep[3] = player4Sheep;
-    }
-
-    public int getPlayer1Wood() {
-        return playerWood[0];
-    }
-
-    public void setPlayer1Wood(int player1Wood) {
-        this.playerWood[0] = player1Wood;
-    }
-
-    public int getPlayer2Wood() {
-        return playerWood[1];
-    }
-
-    public void setPlayer2Wood(int player2Wood) {
-        this.playerWood[1] = player2Wood;
-    }
-
-    public int getPlayer3Wood() {
-        return playerWood[2];
-    }
-
-    public void setPlayer3Wood(int player3Wood) {
-        this.playerWood[2] = player3Wood;
-    }
-
-    public int getPlayer4Wood() {
-        return playerWood[3];
-    }
-
-    public void setPlayer4Wood(int player4Wood) {
-        this.playerWood[3] = player4Wood;
-    }
-
+    public void resetLastMsg() {lastMsg = " ";}
     //My get functions for onCLick method messages
     public int getLastRoll(){
         return this.lastRoll;
     }
+    public void setPlayerOre(int val, int playerId) {
+        playerOre[playerId] = val;
+    }
+    public void setPlayerWheat(int val, int playerId) {
+        playerWheat[playerId] = val;
+    }
+    public void setPlayerSheep(int val, int playerId) {
+        playerSheep[playerId] = val;
+    }
+    public void setPlayerWood(int val, int playerId) {
+        playerWood[playerId] = val;
+    }
+    public void setPlayerBrick(int val, int playerId) {
+        playerBrick[playerId] = val;
+    }
+
 }

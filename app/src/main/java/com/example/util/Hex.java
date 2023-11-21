@@ -43,6 +43,12 @@ public class Hex {
         }
         return false;
     }
+    public float[] getCenter() {
+        float[] pair = new float[2];
+        pair[0] = corners[2];
+        pair[1] = corners[1] + ((corners[11] - corners[1])/2);
+        return pair;
+    }
     public boolean hasRobber() {
         return robber;
     }

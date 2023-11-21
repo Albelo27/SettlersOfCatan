@@ -5,9 +5,9 @@ public class DoNotTouch {
         //this ctor is doing its best
     }
     //X and Y arrays that represent the coordinates of the intersections of the hexagons
-    //TODO add 20 to all of the y values
     public final float[] X = {732, 785, 838, 891, 944, 997, 1050, 1103, 1156, 1209, 1262}; //length = 11
-    public final float[] Y = {0, 31, 93, 125, 186, 217, 279, 310, 372, 403, 465, 496};//length = 12
+    public final float[] Y = {20, 51, 113, 145, 206, 237, 299, 330, 392, 423, 485, 516};
+    //public final float[] Yold = {0, 31, 93, 125, 186, 217, 279, 310, 372, 403, 465, 496};//length = 12
     //all of the vertexes in play almost in order but its not super important that they end up in order
     public final float[] vertexList = {X[2], Y[1], X[3], Y[0], X[4], Y[1], X[4], Y[2], X[3], Y[3], X[2], Y[2],
             X[4], Y[1], X[5], Y[0], X[6], Y[1], X[6], Y[2], X[5], Y[3], X[4], Y[2],
@@ -40,4 +40,21 @@ public class DoNotTouch {
     public float[] h16 = {X[2], Y[9], X[3], Y[8], X[4], Y[9], X[4], Y[10], X[3], Y[11], X[2], Y[10]};
     public float[] h17 = {X[4], Y[9], X[5], Y[8], X[6], Y[9], X[6], Y[10], X[5], Y[11], X[4], Y[10]};
     public float[] h18 = {X[6], Y[9], X[7], Y[8], X[8], Y[9], X[8], Y[10], X[7], Y[11], X[6], Y[10]};
+
+    public int findXIndx(float in) {
+        for (int q = 0; q < X.length; q++) {
+            if (in == X[q]) {
+                return q;
+            }
+        }
+        return -1;
+    }
+    public int findYIndx(float in) {
+        for (int q = 0; q < Y.length; q++) {
+            if (in == Y[q]) {
+                return q;
+            }
+        }
+        return -1;
+    }
 }

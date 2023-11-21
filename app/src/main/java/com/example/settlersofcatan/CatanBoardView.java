@@ -15,12 +15,16 @@ import com.example.util.Building;
 import com.example.util.DoNotTouch;
 import com.example.util.Hex;
 import com.example.util.PlayerData;
+import com.example.util.Road;
+
+import java.util.ArrayList;
 
 public class CatanBoardView extends SurfaceView {
 
     private final DoNotTouch c = new DoNotTouch();
     private final float[] vl = c.vertexList;
     private CatanGameState gs;
+    private Canvas canvas;
     private final Hex[] hexVals = new Hex[19];
     private final Paint orePaint = new Paint();
     private final Paint brickPaint = new Paint();
@@ -28,9 +32,13 @@ public class CatanBoardView extends SurfaceView {
     private final Paint wheatPaint = new Paint();
     private final Paint woodPaint = new Paint();
     private final Paint hitboxPaint = new Paint();
-    private Paint[] playerPaint = new Paint[4];
+    private final Paint textPaint = new Paint();
+    private final Paint[] playerPaint = new Paint[4];
     private final Path path = new Path();
     public final int radius = 10;
+    private ArrayList<Float> xh = new ArrayList<Float>();
+    private ArrayList<Float> yh = new ArrayList<Float>();
+    boolean drawH = false;
 
     public CatanBoardView(Context c, AttributeSet attr) {
         //surface view ctr
@@ -43,6 +51,7 @@ public class CatanBoardView extends SurfaceView {
         sheepPaint.setStyle(Paint.Style.FILL);
         brickPaint.setStyle(Paint.Style.FILL);
         hitboxPaint.setStyle(Paint.Style.STROKE);
+        textPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         playerPaint[0] = new Paint();
         playerPaint[1] = new Paint();
         playerPaint[2] = new Paint();
@@ -52,6 +61,8 @@ public class CatanBoardView extends SurfaceView {
             p.setStyle(Paint.Style.FILL);
         }
         hitboxPaint.setColor(Color.BLACK);
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(17);
         playerPaint[0].setColor(0xFFc12a43);
         playerPaint[1].setColor(0xFF2a3ec1);
         playerPaint[2].setColor(0xFFc17b2a);
@@ -74,6 +85,7 @@ public class CatanBoardView extends SurfaceView {
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
+        this.canvas = canvas;
         for (Hex hexVal : hexVals) {
             if (hexVal != null) {
                 traceHex(hexVal.getCorners());
@@ -94,9 +106,12 @@ public class CatanBoardView extends SurfaceView {
                         canvas.drawPath(path, woodPaint);
                         break;
                 }
+                if (hexVal.getGenNum() > -1) {
+                    canvas.drawText(Integer.toString(hexVal.getGenNum()), hexVal.getCenter()[0], hexVal.getCenter()[1], textPaint);
+                }
             }
         }
-        if (gs != null) {//TODO make radius and square variables so its easier to alter the UI
+        if (gs != null) {
            for (int a = 0; a < gs.data.length; a++) {
                for (Building b : gs.data[a].buildings) {
                    if (b.getName().equals("settlement")) {
@@ -105,14 +120,20 @@ public class CatanBoardView extends SurfaceView {
                        canvas.drawRect(b.getX()-radius, b.getY()-radius, b.getX()+radius, b.getY()+radius, playerPaint[a]);
                    }
                }
-               for (float[] f : gs.data[a].roads) {
-                    canvas.drawLine(f[0], f[1], f[2], f[3], playerPaint[a]);
+               for (Road r : gs.data[a].roads) {
+                    canvas.drawLine(r.x, r.y, r.z, r.q, playerPaint[a]);
                }
            }
+            if (drawH) {
+                for (int x = 0; x < xh.size(); x++) {
+                        canvas.drawRect(xh.get(x) - (radius*2), yh.get(x) - (radius *2), xh.get(x) + (radius*2), yh.get(x) + (radius *2), hitboxPaint);
+                }
+            }
         }
-        for (int a = 0; a < c.vertexList.length; a += 2) {
-            canvas.drawRect(vl[a] - (radius*2), vl[a+1] - (radius *2), vl[a] + (radius*2), vl[a+1] + (radius *2), hitboxPaint);
-        }
+//        for (int a = 0; a < c.vertexList.length; a += 2) {
+//            canvas.drawRect(vl[a] - (radius*2), vl[a+1] - (radius *2), vl[a] + (radius*2), vl[a+1] + (radius *2), hitboxPaint);
+//        }
+        drawH = false;
     }
 
     private void traceHex(float[] cords) {
@@ -121,5 +142,17 @@ public class CatanBoardView extends SurfaceView {
         for (int a = 2; a < 12; a+=2) {
             path.lineTo(cords[a], cords[a+1]);
         }
+    }
+    public void setHitBoxVals(ArrayList<Float> hitboxx, ArrayList<Float> hitboxy) {
+        xh = hitboxx;
+        yh = hitboxy;
+    }
+
+    public void setHDraw(boolean in) {
+        drawH = in;
+    }
+
+    public Canvas getCanvas() {
+        return canvas;
     }
 }//end of class

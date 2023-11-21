@@ -7,6 +7,7 @@ import com.example.actions.PlayDCAction;
 import com.example.actions.RollDiceAction;
 import com.example.actions.SendPlayerTradeAction;
 import com.example.actions.SendTradeAction;
+import com.example.game.GameFramework.Game;
 import com.example.game.GameFramework.LocalGame;
 import com.example.game.GameFramework.actionMessage.EndTurnAction;
 import com.example.game.GameFramework.actionMessage.GameAction;
@@ -65,11 +66,19 @@ public class CatanLocalGame extends LocalGame {
             //TODO implement later
             return true; // legal move
         } else if(action instanceof SendPlayerTradeAction) {
-            //TODO implement later
+            //TODO implement for final network play
             return true; // legal move
         } else if(action instanceof RollDiceAction) {
             gameState.rollDice(playerID);
             gameState.getRes(playerID);
+            if (gameState.getLastRoll() == 7) {
+                //TODO tell the AI a 7 was rolled
+                for (GamePlayer p : players) {
+                    if (p instanceof CatanHumanPlayer) {
+                        ((CatanHumanPlayer) p).setClassState(7);
+                    }
+                }
+            }
             return true; // legal move
         } else if(action instanceof BuildAction) {
             BuildAction buildAction = (BuildAction)action;
@@ -96,7 +105,6 @@ public class CatanLocalGame extends LocalGame {
             }
             return true; // legal move
         } else if (action instanceof EndTurnAction) {
-            Log.i("Local", "End Turn Received");
            if (gameState.getPlayerUp() == 0) {
                gameState.setPlayerUp(1);
            } else {
