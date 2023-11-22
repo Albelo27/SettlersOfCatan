@@ -5,6 +5,7 @@ import android.view.inputmethod.InsertGesture;
 
 import java.util.ArrayList;
 
+import com.example.actions.PlayDCAction;
 import com.example.util.Building;
 import com.example.util.DoNotTouch;
 import com.example.util.Hex;
@@ -232,7 +233,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @param X the X-coordinate of the first intersection of the road
      * @param Y the Y-coordinate of the first intersection of the road
      * @param Q  the X-coordinate of the second intersection of the road
-     * @param Z the Y-coordinate of the first intersection of the road
+     * @param Z the Y-coordinate of the second intersection of the road
      * @return true if the road got built, false if the player was out of turn or is out of resources.
      */
     public boolean buildRoad(int playerID, float X, float Y, float Z, float Q) {
@@ -430,6 +431,84 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     public boolean playDC(int playerID, int cardID, int resourceID) {
         //TODO each development card will have it's own function and they will be called by LocalGame, make sure they each update lastMsg so there is an accurate turn summary
         return false;
+    }
+    /**
+     * Player selects 1 type of resource. All other players must give that player all of that selected resource they own.
+     * @param playerID the player who played the Monopoly Development Card
+     * @param resourceID the resource that was selected
+     * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
+     */
+    public boolean MONOPOLY (int playerID, int resourceID) {
+
+        return true;
+    }
+    /**
+     * Moves robber. Increases points for largest army.
+     * @param playerID the player who played the Knight Development Card
+     * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
+     */
+    public boolean KNIGHT (int playerID) {
+        if(playerID != playerUp) return false;
+            playerKCs[playerID] ++;
+        return true;
+    }
+    /**
+     * Allows Player to build 2 legal roads
+     * @param playerID the player who played the Road Builder Development Card
+     * @param X the X-coordinate of the first intersection of the road
+     * @param Y the Y-coordinate of the first intersection of the road
+     * @param Q  the X-coordinate of the second intersection of the road
+     * @param Z the Y-coordinate of the second intersection of the road
+     * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
+     */
+    public boolean ROAD_BUILDER (int playerID, float X, float Y, float Z, float Q) {
+
+        if (playerID != playerUp) return false;
+        buildRoad(playerID, X, Y, Z, Q);
+        buildRoad(playerID, X, Y, Z, Q);
+            return true;
+        }
+    /**
+     * Player takes 2 of any resource.
+     * @param playerID the player who played the Year of Plenty Development Card
+     * @param resourceID the resource that was selected
+     * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
+     */
+
+    public boolean YEAR_OF_PLENTY ( int playerID, int resourceID)
+    {
+        if (playerID != playerUp) return false;
+        for (int i = 0; i < 2; i++) {
+            switch (resourceID) {
+                case 0:
+                    playerOre[playerID]++;
+                    break;
+                case 1:
+                    playerWheat[playerID]++;
+                    break;
+                case 2:
+                    playerBrick[playerID]++;
+                    break;
+                case 3:
+                    playerSheep[playerID]++;
+                    break;
+                case 4:
+                    playerWood[playerID]++;
+                    break;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Player earns 1 Victory Point
+     * @param playerID the player who played the Victory Point Development Card
+     * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
+     */
+    public boolean VictoryPoint (int playerID) {
+        if(playerID != playerUp) return false;
+            playerVPs[playerID]++;
+        return true;
     }
 
     /**
