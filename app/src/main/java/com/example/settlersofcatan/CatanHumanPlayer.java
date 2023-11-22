@@ -6,12 +6,16 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.actions.BuildAction;
+import com.example.actions.BuyDCAction;
+import com.example.actions.DiscardAction;
 import com.example.actions.RollDiceAction;
 import com.example.game.GameFramework.GameMainActivity;
 import com.example.game.GameFramework.actionMessage.EndTurnAction;
@@ -50,9 +54,9 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     5 selecting a knight location
     6 selecting a resource for DC
     7 rolled a 7 (Oh no!!)
+    8 maritime trade
     more coming soon with more functionality in the beta release
      */
-    //TODO add 5 and 6 functionality
     private int classState = 0;
     private String state = "";
     private Button tradeButton;
@@ -61,6 +65,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     private Button roadButton;
     private Button settlementButton;
     private Button cityButton;
+    private Button dcButton;
     private ImageView die1;
     private ImageView die2;
     private TextView updateTxt;
@@ -74,12 +79,15 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     private TextView p2vp;
     private TextView p2KC;
     private TextView stateView;
+    private Spinner dcSpinner;
     private CatanGameState gameState;
     CatanBoardView view;
     private final DoNotTouch c = new DoNotTouch();
     private final float[] vl = c.vertexList;
     private ArrayList<Float> xHitCords = new ArrayList<Float>();
     private ArrayList<Float> yHitCords = new ArrayList<Float>();
+    private ArrayList<String> spinnerList = new ArrayList<String>();
+    private ArrayAdapter<String> spinnerAdapter;
     float[] roadCords = new float[4];
     final int ORE = 0;
     final int WHEAT = 1;
@@ -146,34 +154,39 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         roadButton = theActivity.findViewById(R.id.roadButton);
         settlementButton = theActivity.findViewById(R.id.settlementButton);
         cityButton = theActivity.findViewById(R.id.cityButton);
-//        wheatButton = theActivity.findViewById(R.id.wheatButton);
-//        oreButton = theActivity.findViewById(R.id.oreButton);
-//        sheepButton = theActivity.findViewById(R.id.sheepButton4);
-//        brickButton = theActivity.findViewById(R.id.brickButton3);
-//        woodButton = theActivity.findViewById(R.id.woodButton5);
+        dcButton = theActivity.findViewById(R.id.DCButton);
         oreText = theActivity.findViewById(R.id.oreButton);
         wheatText = theActivity.findViewById(R.id.wheatButton);
         sheepText = theActivity.findViewById(R.id.sheepButton);
         brickText = theActivity.findViewById(R.id.brickButton);
         woodText = theActivity.findViewById(R.id.woodButton);
+        dcSpinner = theActivity.findViewById(R.id.devCardSpinner);
         tradeButton.setOnClickListener(this);
         rollButton.setOnClickListener(this);
         endTurnButton.setOnClickListener(this);
         roadButton.setOnClickListener(this);
         settlementButton.setOnClickListener(this);
         cityButton.setOnClickListener(this);
+        dcButton.setOnClickListener(this);
         oreText.setOnClickListener(this);
         wheatText.setOnClickListener(this);
         sheepText.setOnClickListener(this);
         brickText.setOnClickListener(this);
         woodText.setOnClickListener(this);
+        spinnerAdapter = new ArrayAdapter<String>(theActivity.getApplicationContext(), R.layout.activity_main, spinnerList);
+        spinnerAdapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+        dcSpinner.setAdapter(spinnerAdapter);
         view.invalidate();//double check the GUI is gonna innit correctly
     }//setAsGui
 
     @Override
     public void onClick(View view) {
         if (view.equals(tradeButton)) { //trade
-            //TODO implement trading
+            if (classState == 8) {
+                classState = 0;
+            } else {
+                classState = 8;
+            }
         } else if (view.equals(rollButton) ) { //roll
             if (gameState.getCanRoll()) {
                 game.sendAction(new RollDiceAction(this));
@@ -201,18 +214,55 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
             } else {
                 classState = 2;
             }
+        } else if (view.equals(dcButton)) {//purchase Development Card
+            game.sendAction(new BuyDCAction(this));
         }
         if (classState == 7) {
             if (view.equals(oreText)) {
-                gameState.setPlayerOre(gameState.playerOre[playerNum]-1, playerNum);
+                if (gameState.playerOre[playerNum] > 0) {getGameState().setPlayerOre(getGameState().playerOre[playerNum]-1, playerNum);}
             } else if (view.equals(wheatText)) {
-                gameState.setPlayerWheat(gameState.playerWheat[playerNum]-1, playerNum);
+                if (gameState.playerWheat[playerNum] > 0) {getGameState().setPlayerWheat(getGameState().playerWheat[playerNum]-1, playerNum);}
             }else if (view.equals(sheepText)) {
-                gameState.setPlayerSheep(gameState.playerSheep[playerNum]-1, playerNum);
+                if (gameState.playerSheep[playerNum] > 0) { getGameState().setPlayerSheep(getGameState().playerSheep[playerNum]-1, playerNum);}
             }else if (view.equals(woodText)) {
-                gameState.setPlayerWood(gameState.playerWood[playerNum]-1, playerNum);
+                if (gameState.playerWood[playerNum] > 0) {getGameState().setPlayerWood(getGameState().playerWood[playerNum]-1, playerNum);}
             }else if (view.equals(brickText)) {
-                gameState.setPlayerBrick(gameState.playerBrick[playerNum]-1, playerNum);
+                if (gameState.playerBrick[playerNum] > 0) {getGameState().setPlayerBrick(getGameState().playerBrick[playerNum]-1, playerNum);}
+            }
+        }
+        if (classState == 8) {
+            if (view.equals(oreText)) {
+                getGameState().setPlayerOre(getGameState().playerOre[playerNum]-4, playerNum);
+                classState = 9;
+            } else if (view.equals(wheatText)) {
+                getGameState().setPlayerWheat(getGameState().playerWheat[playerNum]-4, playerNum);
+                classState = 9;
+            }else if (view.equals(sheepText)) {
+                getGameState().setPlayerSheep(getGameState().playerSheep[playerNum]-4, playerNum);
+                classState = 9;
+            }else if (view.equals(woodText)) {
+                getGameState().setPlayerWood(getGameState().playerWood[playerNum]-4, playerNum);
+                classState = 9;
+            }else if (view.equals(brickText)) {
+                getGameState().setPlayerBrick(getGameState().playerBrick[playerNum]-4, playerNum);
+                classState = 9;
+            }
+        } else if (classState == 9) {
+            if (view.equals(oreText)) {
+                getGameState().setPlayerOre(getGameState().playerOre[playerNum]+1, playerNum);
+                classState = 0;
+            } else if (view.equals(wheatText)) {
+                getGameState().setPlayerWheat(getGameState().playerWheat[playerNum]+1, playerNum);
+                classState = 0;
+            }else if (view.equals(sheepText)) {
+                getGameState().setPlayerSheep(getGameState().playerSheep[playerNum]+1, playerNum);
+                classState = 0;
+            }else if (view.equals(woodText)) {
+                getGameState().setPlayerWood(getGameState().playerWood[playerNum]+1, playerNum);
+                classState = 0;
+            }else if (view.equals(brickText)) {
+                getGameState().setPlayerBrick(getGameState().playerBrick[playerNum]+1, playerNum);
+                classState = 0;
             }
         }
         updateUI();
@@ -260,7 +310,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     }//onTouch
 
     public void updateUI() {
-        //TODO add a turn summary instead of just the last roll
+        //TODO make the full 4-person UI update properly
         updateTxt.setText(gameState.getLastMsg());
         String ore = "Ore: " + gameState.playerOre[playerNum];
         oreText.setText(ore);
@@ -279,6 +329,21 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         String p2points = "VP: " + gameState.playerVPs[1];
         p2vp.setText(p2points);
         String p2knight = "KC: " + gameState.playerKCs[1];
+        spinnerList.clear();
+        for (Integer i : gameState.data[playerNum].devCards) {
+            switch(i) {
+                case 0: //monopoly
+                    spinnerList.add("Monopoly"); break;
+                case 1: //knight
+                    spinnerList.add("Knight"); break;
+                case 2: //roadBuilder
+                    spinnerList.add("Road Builder"); break;
+                case 3: //year of plenty
+                    spinnerList.add("Year of Plenty"); break;
+                case 4: //victory point
+                    spinnerList.add("Victory Point"); break;
+            }
+        }
         switch (gameState.lastRoll1) {
             case 1:
                 die1.setImageResource(R.mipmap.face1); break;
@@ -316,6 +381,8 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
             settlementButton.setTextColor(0xFF000000);
             cityButton.setEnabled(false);
             cityButton.setTextColor(0xFF000000);
+            dcButton.setEnabled(false);
+            dcButton.setTextColor(0xFF000000);
             roadButton.setEnabled(false);
             roadButton.setTextColor(0xFF000000);
 
@@ -329,6 +396,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 endTurnButton.setEnabled(false);
                 endTurnButton.setTextColor(0xFF000000);
                 state = "You rolled a 7, discard resources until there are 7 or fewer in your hand.";
+                stateView.setText(state);
             } else {
                 endTurnButton.setEnabled(true);
                 endTurnButton.setTextColor(0xFFFFFFFF);
@@ -338,8 +406,67 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 woodText.setEnabled(false);
                 brickText.setEnabled(false);
                 classState = 0;
+                game.sendAction(new DiscardAction(this, gameState));
             }
-        } else if (gameState.getPlayerUp() == playerNum) {
+        } else if (classState == 8) {
+            state = "Choose the resource to trade 4 for 1";
+            stateView.setText(state);
+            endTurnButton.setEnabled(false);
+            endTurnButton.setTextColor(0xFF000000);
+            rollButton.setEnabled(false);
+            rollButton.setTextColor(0xFF000000);
+            settlementButton.setEnabled(false);
+            settlementButton.setTextColor(0xFF000000);
+            cityButton.setEnabled(false);
+            cityButton.setTextColor(0xFF000000);
+            dcButton.setEnabled(false);
+            dcButton.setTextColor(0xFF000000);
+            roadButton.setEnabled(false);
+            roadButton.setTextColor(0xFF000000);
+            if (gameState.playerWheat[this.playerNum] >= 4) {
+                wheatText.setEnabled(true);
+                wheatText.setTextColor(0xFFFFFFFF);
+            }
+            if (gameState.playerOre[this.playerNum] >= 4) {
+                oreText.setEnabled(true);
+                oreText.setTextColor(0xFFFFFFFF);
+            }
+            if (gameState.playerSheep[this.playerNum] >= 4) {
+                sheepText.setEnabled(true);
+                sheepText.setTextColor(0xFFFFFFFF);
+            }
+            if (gameState.playerWood[this.playerNum] >= 4) {
+                woodText.setEnabled(true);
+                woodText.setTextColor(0xFFFFFFFF);
+            }
+            if (gameState.playerBrick[this.playerNum] >= 4) {
+                brickText.setEnabled(true);
+                brickText.setTextColor(0xFFFFFFFF);
+            }
+        } else if (classState == 9) {
+            state = "Choose the resource to receive 1";
+            stateView.setText(state);
+            endTurnButton.setEnabled(false);
+            endTurnButton.setTextColor(0xFF000000);
+            rollButton.setEnabled(false);
+            rollButton.setTextColor(0xFF000000);
+            settlementButton.setEnabled(false);
+            settlementButton.setTextColor(0xFF000000);
+            cityButton.setEnabled(false);
+            cityButton.setTextColor(0xFF000000);
+            dcButton.setEnabled(false);
+            dcButton.setTextColor(0xFF000000);
+            roadButton.setEnabled(false);
+            roadButton.setTextColor(0xFF000000);
+            oreText.setEnabled(true);
+            wheatText.setEnabled(true);
+            sheepText.setEnabled(true);
+            woodText.setEnabled(true);
+            brickText.setEnabled(true);
+            //uses the same action as discarding because both require nothing other than updating the official gameState
+            game.sendAction(new DiscardAction(this, gameState));
+        }
+        else if (gameState.getPlayerUp() == playerNum) {
            endTurnButton.setEnabled(true);
            endTurnButton.setTextColor(0xFFFFFFFF);
            tradeButton.setEnabled(false);
@@ -349,6 +476,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
             sheepText.setEnabled(false);
             woodText.setEnabled(false);
             brickText.setEnabled(false);
+
            if (gameState.playerWood[playerNum] < 1 || gameState.playerBrick[playerNum] < 1) {
                roadButton.setEnabled(false);
                roadButton.setTextColor(0xFF000000);
@@ -370,6 +498,13 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                cityButton.setEnabled(true);
                cityButton.setTextColor(0xFFFFFFFF);
            }
+           if (gameState.playerOre[playerNum] < 1 || gameState.playerWheat[playerNum] < 1 || gameState.playerSheep[playerNum] < 1) {
+               dcButton.setEnabled(false);
+               dcButton.setTextColor(0xFF000000);
+           } else {
+               dcButton.setEnabled(true);
+               dcButton.setTextColor(0xFFFFFFFF);
+           }
            if (gameState.getCanRoll()) {
                rollButton.setEnabled(true);
                rollButton.setTextColor(0xFFFFFFFF);
@@ -377,7 +512,15 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                rollButton.setEnabled(false);
                rollButton.setTextColor(0xFF000000);
            }
-           switch (classState) {//TODO add other class states
+           //if any resources are higher than 4
+           if ((gameState.playerWheat[this.playerNum] >= 4) || (gameState.playerOre[this.playerNum] >= 4) || (gameState.playerSheep[this.playerNum] >= 4) || (gameState.playerWood[this.playerNum] >= 4) || (gameState.playerBrick[this.playerNum] >= 4)) {
+               tradeButton.setEnabled(true);
+               tradeButton.setTextColor(0xFFFFFFFF);
+           } else {
+               tradeButton.setEnabled(false);
+               tradeButton.setTextColor(0xFF000000);
+           }
+           switch (classState) {
                case 0:
                    state = "You are idle."; break;
                case 1:
@@ -388,8 +531,6 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                    state = "Choose your first road point!"; break;
                case 4:
                    state = "choose your second road point!"; break;
-               case 7:
-                   state = "Discard resources until your hand total is <= 7";
                default:
                    state = "";
            }
@@ -403,6 +544,8 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
            rollButton.setTextColor(0xFF000000);
            cityButton.setEnabled(false);
            cityButton.setTextColor(0xFF000000);
+           dcButton.setEnabled(false);
+           dcButton.setTextColor(0xFF000000);
            settlementButton.setEnabled(false);
            settlementButton.setTextColor(0xFF000000);
            tradeButton.setEnabled(false);
@@ -423,9 +566,13 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
             switch(classState) {
                 case 1:
                     for (Road test : getGameState().data[this.playerNum].roads) {
-                        if (getGameState().checkLegalSettlement(this.playerNum, test.x, test.y) || getGameState().checkLegalSettlement(this.playerNum, test.z, test.q)) {
+                        if (getGameState().checkLegalSettlement(this.playerNum, test.x, test.y)) {
                             xHitCords.add(test.x);
                             yHitCords.add(test.y);
+                        }//both should be independent for situations where both ends of a road are valid settlement locations
+                        if (getGameState().checkLegalSettlement(this.playerNum, test.z, test.q)) {
+                            xHitCords.add(test.z);
+                            yHitCords.add(test.q);
                         }
                     }
                     break;

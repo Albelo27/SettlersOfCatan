@@ -1,5 +1,7 @@
 package com.example.settlersofcatan;
 
+import android.util.Log;
+
 import com.example.actions.BuildAction;
 import com.example.actions.RollDiceAction;
 import com.example.game.GameFramework.actionMessage.EndTurnAction;
@@ -34,7 +36,6 @@ public class CatanSimpleAI extends GameComputerPlayer {
      */
     @Override
     protected void receiveInfo(GameInfo info) {
-
         // Check if it's this AI's turn
         if (info instanceof CatanGameState) {
             gameState = (CatanGameState) info;
@@ -49,7 +50,6 @@ public class CatanSimpleAI extends GameComputerPlayer {
         if (action != null) {
             game.sendAction(action); // Send the chosen move to the game
         }
-
         // End Turn
         game.sendAction(new EndTurnAction(this));
     }
@@ -64,11 +64,11 @@ public class CatanSimpleAI extends GameComputerPlayer {
 
         // Upgrade to City
         // Add if statements for if its upgradeable, if not; skip to next case
-        if (gameState.getPlayer2Wheat() >= 2 && gameState.getPlayer2Ore() >= 3) {
+        if (gameState.playerWheat[1] >= 2 && gameState.playerOre[1] >= 3) {
             for (Building b : gameState.data[this.playerNum].buildings) {
                 if (b.getName().equals("settlement")) {
-                    int x = (int) b.getX();
-                    int y = (int) b.getY();
+                    float x = b.getX();
+                    float y = b.getY();
                     return new BuildAction(this, "city", x, y);
                 }
             }
@@ -76,7 +76,7 @@ public class CatanSimpleAI extends GameComputerPlayer {
 
         // Build Settlement
         // Add if statements for if its buildable, if not; skip to the next case
-        else if (gameState.getPlayer2Wheat() >= 1 && gameState.getPlayer2Sheep() >= 1 && gameState.getPlayer2Brick() >= 1 && gameState.getPlayer2Wood() >= 1) { // Checks for resources
+        else if (gameState.playerWheat[1] >= 1 && gameState.playerSheep[1] >= 1 && gameState.playerBrick[1] >= 1 && gameState.playerWood[1] >= 1) { // Checks for resources
             for (Road road : gameState.data[this.playerNum].roads) {
                 if (isValidSettlementLocation((int) road.x, (int) road.y)) {
                     return new BuildAction(this, "settlement", road.x, road.y);
@@ -89,22 +89,28 @@ public class CatanSimpleAI extends GameComputerPlayer {
 
         // Build Road
         // Add if statements for if its buildable, if not; skip to next case
-        else if (gameState.getPlayer2Brick() >= 1 && gameState.getPlayer2Wood() >= 1) {
+        else if (gameState.playerBrick[1] >= 1 && gameState.playerWood[1] >= 1) {
 
             // Loop through existing roads to find a legal extension point
             for (Road road : gameState.data[this.playerNum].roads) {
                 // Check both ends of each road
-                if (canPlaceRoadAt((int) road.x, (int) road.y)) {
+                Boolean test1 = canPlaceRoadAt((int) road.x, (int) road.y);
+                Boolean test2 = canPlaceRoadAt((int) road.z, (int) road.q);
+                if (test1) {
+                    Log.e("SimpleAI  canPlaceRoadAt", Boolean.toString(test1));
                     return new BuildAction(this, "road", road.x, road.y);
                 }
-                if (canPlaceRoadAt((int) road.z, (int) road.q)) {
+                if (test2) {
+                    Log.e("SimpleAI  canPlaceRoadAt", Boolean.toString(test2));
                     return new BuildAction(this, "road", road.z, road.q);
                 }
             }
 
             // Loop through settlements as potential starting points for new roads
             for (Building building : gameState.data[this.playerNum].buildings) {
-                if (canPlaceRoadAt((int) building.getX(), (int) building.getY())) {
+                Boolean test3 = canPlaceRoadAt((int) building.getX(), (int) building.getY());
+                Log.e("SimpleAI  canPlaceRoadAt", Boolean.toString(test3));
+                if (test3) {
                     return new BuildAction(this, "road", building.getX(), building.getY());
                 }
             }

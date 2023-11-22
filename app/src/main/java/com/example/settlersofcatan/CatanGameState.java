@@ -106,13 +106,12 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerWood[k] = 0;
             data[k] = new PlayerData(); //create a new class that contains the player's roads, cards and buildings
         }
-        //TODO this the initial fixed starting position for infrastructure and should be made variable for beta release
+        //TODO this the initial fixed starting position for infrastructure and should be made variable for the final game
         playerWheat[0] = 10;
         playerBrick[0] = 10;
         playerWood[0] = 10;
-        playerOre[0] = 10;
         playerSheep[0] = 10;
-        //TODO set this to the proper innit for class
+        playerOre[0] = 10;
         playerWood[1] = 1;
         playerBrick[1] = 1;
         playerOre[1] = 1;
@@ -240,7 +239,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         if(playerID != playerUp) return false;
         if(playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
             Road rn = new Road(X, Y, Z, Q);
-            if (checkLegalRoad(playerID, rn)) {
+            if (checkLegalRoad(playerID, rn)) {//TODO update checkLegalRoad to make sure the segments are 1 apart
                 playerRCs[playerID]++;
                 playerBrick[playerID]--;
                 playerWood[playerID]--;
@@ -253,6 +252,9 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
 
     public boolean checkLegalRoad(int playerID, Road road) {
         for (Building b : data[playerID].buildings) {
+            if ((Math.abs((c.findXIndx(road.x) - c.findXIndx(road.z))) > 1) || (Math.abs(c.findYIndx(road.y) - c.findYIndx(road.q)) > 1)) {
+                return false;
+            }
             if ((b.getX() == road.x && b.getY() == road.y)||(b.getX() == road.z && b.getY() == road.q)) {
                 return true;
             }
@@ -294,13 +296,11 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
 
     public boolean checkLegalSettlement(int playerID, float x, float y) {
         ArrayList<Road> rlist = new ArrayList<Road>();
-//        checkedRoads.clear();
         for (Building b : data[playerID].buildings) {
             if (b.getX() == x && b.getY() == y) {
                 return false;
             }
             if ((Math.abs((c.findXIndx(b.getX()) - c.findXIndx(x))) <= 1) && (Math.abs(c.findYIndx(b.getY()) - c.findYIndx(y)) <= 1)) {
-                Log.e("gameState","too close to another settlement");
                 return false;
             }
         }
@@ -422,24 +422,71 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
     }
 
     /**
-     * Plays a development card from a players hand
-     * @param playerID the player who played the card
-     * @param cardID the card that was played
-     * @param resourceID the resource that was selected (only used for the Monopoly and Year of Plenty cards)
-     * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
-     */
-    public boolean playDC(int playerID, int cardID, int resourceID) {
-        //TODO each development card will have it's own function and they will be called by LocalGame, make sure they each update lastMsg so there is an accurate turn summary
-        return false;
-    }
-    /**
      * Player selects 1 type of resource. All other players must give that player all of that selected resource they own.
      * @param playerID the player who played the Monopoly Development Card
      * @param resourceID the resource that was selected
      * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
      */
-    public boolean MONOPOLY (int playerID, int resourceID) {
-
+    public boolean playMonopoly (int playerID, int resourceID) {
+        if (playerID == playerUp) {
+            int total = 0;
+            switch (resourceID) {
+                case ORE:
+                    for (int q = 0; q < playerOre.length; q++) {
+                        if (q != playerID) {
+                            total += playerOre[q];
+                            playerOre[q] = 0;
+                        }
+                    }
+                    playerOre[playerID] += total;
+                    total = 0;
+                break;
+                case WHEAT:
+                    for (int q = 0; q < playerWheat.length; q++) {
+                        if (q != playerID) {
+                            total += playerWheat[q];
+                            playerWheat[q] = 0;
+                        }
+                    }
+                    playerWheat[playerID] += total;
+                    total = 0;
+                break;
+                case SHEEP:
+                    for (int q = 0; q < playerSheep.length; q++) {
+                        if (q != playerID) {
+                            total += playerSheep[q];
+                            playerSheep[q] = 0;
+                        }
+                    }
+                    playerSheep[playerID] += total;
+                    total = 0;
+                break;
+                case WOOD:
+                    for (int q = 0; q < playerWood.length; q++) {
+                        if (q != playerID) {
+                            total += playerWood[q];
+                            playerWood[q] = 0;
+                        }
+                    }
+                    playerWood[playerID] += total;
+                    total = 0;
+                break;
+                case BRICK:
+                    for (int q = 0; q < playerBrick.length; q++) {
+                        if (q != playerID) {
+                            total += playerBrick[q];
+                            playerBrick[q] = 0;
+                        }
+                    }
+                    playerBrick[playerID] += total;
+                    total = 0;
+                break;
+                default:
+                    return false;
+            }
+        } else {
+            return false;
+        }
         return true;
     }
     /**
@@ -447,9 +494,9 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @param playerID the player who played the Knight Development Card
      * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
      */
-    public boolean KNIGHT (int playerID) {
-        if(playerID != playerUp) return false;
-            playerKCs[playerID] ++;
+    public boolean playKnight (int playerID) {
+        if(playerID != playerUp) {return false;}
+            playerKCs[playerID]++;
         return true;
     }
     /**
@@ -461,13 +508,10 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @param Z the Y-coordinate of the second intersection of the road
      * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
      */
-    public boolean ROAD_BUILDER (int playerID, float X, float Y, float Z, float Q) {
-
+    public boolean playRoadBuilder (int playerID, float X, float Y, float Z, float Q) {
         if (playerID != playerUp) return false;
-        buildRoad(playerID, X, Y, Z, Q);
-        buildRoad(playerID, X, Y, Z, Q);
-            return true;
-        }
+        return buildRoad(playerID, X, Y, Z, Q);
+    }
     /**
      * Player takes 2 of any resource.
      * @param playerID the player who played the Year of Plenty Development Card
@@ -475,40 +519,37 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
      * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
      */
 
-    public boolean YEAR_OF_PLENTY ( int playerID, int resourceID)
+    public boolean playYearOfPlenty ( int playerID, int resourceID)
     {
-        if (playerID != playerUp) return false;
-        for (int i = 0; i < 2; i++) {
+        if (playerID != playerUp) {return false;}
             switch (resourceID) {
                 case 0:
-                    playerOre[playerID]++;
+                    playerOre[playerID] += 2;
                     break;
                 case 1:
-                    playerWheat[playerID]++;
+                    playerWheat[playerID] += 2;
                     break;
                 case 2:
-                    playerBrick[playerID]++;
+                    playerBrick[playerID] += 2;
                     break;
                 case 3:
-                    playerSheep[playerID]++;
+                    playerSheep[playerID] += 2;
                     break;
                 case 4:
-                    playerWood[playerID]++;
+                    playerWood[playerID] += 2;
                     break;
             }
-        }
         return true;
     }
 
     /**
-     * Player earns 1 Victory Point
-     * @param playerID the player who played the Victory Point Development Card
-     * @return true if the card was played successfully, false if the player did not have the card in their hand or they played out of turn
+     * Increment the player's victory points by one if they get a VP development card
+     * @param playerID the player who played the card
      */
-    public boolean VictoryPoint (int playerID) {
-        if(playerID != playerUp) return false;
+    public void playVictoryPoint(int playerID) {
+        if (playerID == playerUp) {
             playerVPs[playerID]++;
-        return true;
+        }
     }
 
     /**

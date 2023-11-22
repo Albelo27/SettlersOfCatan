@@ -7,20 +7,30 @@ public class PlayDCAction extends GameAction {
 
     private int devCardPlayed;
     private int resourceID;
-    /**
-     * constructor for creating a PlayDCAction to be sent to the LocalGame with received
-     * parameters
-     *
-     * @param player the player who created the action
-     * @param cardPlayed the type of development card that was played
-     * @param resID the type of resource chosen by the player for applicable DCs
-     */
-    public PlayDCAction(GamePlayer player, int cardPlayed, int resID) {
+    private float x;
+    private float y;
+    private float z;
+    private float q;
+
+    public PlayDCAction(GamePlayer player, int cardPlayed) {
         super(player);
         this.devCardPlayed = cardPlayed;
     }
 
+    public PlayDCAction(GamePlayer player, int cardPlayed, int resID) {
+        super(player);
+        this.devCardPlayed = cardPlayed;
+        this.resourceID = resID;
+    }
 
+    public PlayDCAction(GamePlayer player, int cardId, float x, float y, float z, float q) {
+        super(player);
+        this.devCardPlayed = cardId;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.q = q;
+    }
 
     public int getDCPlayed() {
         return devCardPlayed;
@@ -28,5 +38,21 @@ public class PlayDCAction extends GameAction {
 
     public int getResID() {
         return resourceID;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getZ() {
+        return z;
+    }
+
+    public float getQ() {
+        return q;
     }
 }

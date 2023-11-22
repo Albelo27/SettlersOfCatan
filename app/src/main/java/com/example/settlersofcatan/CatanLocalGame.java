@@ -3,6 +3,8 @@ package com.example.settlersofcatan;
 import android.util.Log;
 
 import com.example.actions.BuildAction;
+import com.example.actions.BuyDCAction;
+import com.example.actions.DiscardAction;
 import com.example.actions.PlayDCAction;
 import com.example.actions.RollDiceAction;
 import com.example.actions.SendPlayerTradeAction;
@@ -72,7 +74,6 @@ public class CatanLocalGame extends LocalGame {
             gameState.rollDice(playerID);
             gameState.getRes(playerID);
             if (gameState.getLastRoll() == 7) {
-                //TODO tell the AI a 7 was rolled
                 for (GamePlayer p : players) {
                     if (p instanceof CatanHumanPlayer) {
                         ((CatanHumanPlayer) p).setClassState(7);
@@ -91,20 +92,26 @@ public class CatanLocalGame extends LocalGame {
             }
             return true; // legal move
         } else if(action instanceof PlayDCAction) {
-            PlayDCAction playDevCard = (PlayDCAction)action;
-            if(playDevCard.getDCPlayed() == 0) { //MONOPOLY
-                gameState.playDC(playerID, playDevCard.getDCPlayed(), playDevCard.getResID());
-            } else if(playDevCard.getDCPlayed() == 1) { //KNIGHT
-                gameState.playDC(playerID, playDevCard.getDCPlayed(), playDevCard.getResID());
-            } else if(playDevCard.getDCPlayed() == 2) { //ROAD_BUILDER
-                gameState.playDC(playerID, playDevCard.getDCPlayed(), playDevCard.getResID());
-            } else if(playDevCard.getDCPlayed() == 3) { //YEAR_OF_PLENTY
-                gameState.playDC(playerID, playDevCard.getDCPlayed(), playDevCard.getResID());
-            } else if(playDevCard.getDCPlayed() == 4) { //VICTORY_POINT
-                gameState.playDC(playerID, playDevCard.getDCPlayed(), playDevCard.getResID());
+            PlayDCAction dcAction = (PlayDCAction)action;
+            if(dcAction.getDCPlayed() == 0) { //MONOPOLY
+                gameState.playMonopoly(player, dcAction.getResID());
+            } else if(dcAction.getDCPlayed() == 1) { //KNIGHT
+                gameState.playKnight(player);
+            } else if(dcAction.getDCPlayed() == 2) { //ROAD_BUILDER
+                gameState.playRoadBuilder(playerID, dcAction.getX(), dcAction.getY(), dcAction.getZ(), dcAction.getQ());
+            } else if(dcAction.getDCPlayed() == 3) { //YEAR_OF_PLENTY
+                gameState.playYearOfPlenty(playerID, dcAction.getResID());
+            } else if(dcAction.getDCPlayed() == 4) { //VICTORY_POINT
+                gameState.playVictoryPoint(playerID);
             }
             return true; // legal move
-        } else if (action instanceof EndTurnAction) {
+        } else if (action instanceof DiscardAction) {
+            gameState = ((DiscardAction) action).getUpdatedState();
+
+        } else if (action instanceof BuyDCAction) {
+            gameState.purchaseDC(playerID);
+        }
+        else if (action instanceof EndTurnAction) {
            if (gameState.getPlayerUp() == 0) {
                gameState.setPlayerUp(1);
            } else {
