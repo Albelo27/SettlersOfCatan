@@ -37,6 +37,9 @@ public class CatanMainActivity extends GameMainActivity {
             public GamePlayer createPlayer(String name) {return new CatanHumanPlayer(name);}});
         playerTypes.add(new GamePlayerType("Catan Computer Opponent") {
             public GamePlayer createPlayer(String name) {return new CatanAI(name);}});
+        playerTypes.add(new GamePlayerType("Simple AI") {
+            public GamePlayer createPlayer(String name) {return new CatanSimpleAI(name);}});
+
         //create a default gameConfig
         GameConfig defaultConfig = new GameConfig(playerTypes, 2, 4, "Settlers of Catan", PORT_NUMBER);
         defaultConfig.addPlayer("Human", 0);

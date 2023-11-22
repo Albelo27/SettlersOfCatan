@@ -9,8 +9,8 @@ public class SendPlayerTradeAction extends GameAction {
      *
      * @param player the player who created the action
      */
-    public SendPlayerTradeAction(GamePlayer player, GamePlayer reciever) {
+    public SendPlayerTradeAction(GamePlayer player, GamePlayer receiver) {
         super(player);
-        new SendTradeAction(reciever);
+        new SendTradeAction(receiver);
     }
 }
