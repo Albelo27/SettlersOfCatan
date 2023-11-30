@@ -237,7 +237,7 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         if(playerID != playerUp) return false;
         if(playerBrick[playerID] >= 1 && playerWood[playerID] >= 1) {
             Road rn = new Road(X, Y, Z, Q);
-            if (checkLegalRoad(playerID, rn)) {//TODO update checkLegalRoad to make sure the segments are 1 apart
+            if (checkLegalRoad(playerID, rn)) {
                 playerRCs[playerID]++;
                 playerBrick[playerID]--;
                 playerWood[playerID]--;
