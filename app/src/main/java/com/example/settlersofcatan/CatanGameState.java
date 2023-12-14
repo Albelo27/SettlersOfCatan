@@ -106,18 +106,15 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerWood[k] = 0;
             data[k] = new PlayerData(); //create a new class that contains the player's roads, cards and buildings
         }
-        playerWheat[0] = 10;
-        playerBrick[0] = 10;
-        playerWood[0] = 10;
-        playerSheep[0] = 10;
-        playerOre[0] = 10;
+        playerWheat[0] = 1;
+        playerBrick[0] = 1;
+        playerWood[0] = 1;
         playerWood[1] = 1;
         playerBrick[1] = 1;
         playerOre[1] = 1;
         data[0].buildings.add(new Building("settlement", c.X[3], c.Y[4], findAdjacent(c.X[3], c.Y[4])));
         data[0].buildings.add(new Building("settlement", c.X[8], c.Y[6], findAdjacent(c.X[8], c.Y[6])));
         data[0].roads.add(new Road(c.X[8], c.Y[6], c.X[8], c.Y[5]));
-        data[0].roads.add(new Road(c.X[7], c.Y[4], c.X[8], c.Y[5]));
         data[0].roads.add(new Road(c.X[3], c.Y[4], c.X[2], c.Y[5]));
         data[1].buildings.add(new Building("settlement", c.X[3], c.Y[8], findAdjacent(c.X[3], c.Y[8])));
         data[1].buildings.add(new Building("settlement", c.X[7], c.Y[8], findAdjacent(c.X[7], c.Y[8])));
