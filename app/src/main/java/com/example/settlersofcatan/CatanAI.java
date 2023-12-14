@@ -32,6 +32,7 @@ public class CatanAI extends GameComputerPlayer {
                 game.sendAction(new RollDiceAction(this));
                 sleep(1);
                 game.sendAction(new EndTurnAction(this));
+                Log.d("RollAI", "End Turn");
             }
         }
     }//receive info

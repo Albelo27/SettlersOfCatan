@@ -36,23 +36,47 @@ public class CatanSimpleAI extends GameComputerPlayer {
      */
     @Override
     protected void receiveInfo(GameInfo info) {
-        // Check if it's this AI's turn
-        if (info instanceof CatanGameState) {
-            gameState = (CatanGameState) info;
-            if (gameState.getPlayerUp() != this.playerNum) {
-                return;
-            }
-        }
+        Log.d("CatanSimpleAI", "receiveInfo called");
 
-        // If it is this AI's turn, decide on a move
-        game.sendAction(new RollDiceAction(this));
-        GameAction action = chooseMove();
-        if (action != null) {
-            game.sendAction(action); // Send the chosen move to the game
+        // Check if the information received is an instance of CatanGameState
+        if (info instanceof CatanGameState) {
+            CatanGameState newGameState = (CatanGameState) info;
+
+            // Check if the received GameState is different from the current gameState
+            if (this.gameState != newGameState) {
+                this.gameState = newGameState;
+                Log.d("CatanSimpleAI", "New GameState received");
+
+                // Check if it's currently this AI's turn
+                if (gameState.getPlayerUp() == this.playerNum) {
+                    Log.d("CatanSimpleAI", "It's AI's turn");
+
+                    // Decide on a move
+                    game.sendAction(new RollDiceAction(this));
+                    Log.d("CatanSimpleAI", "Rolls Dice");
+                    sleep(1); // Small delay for better log readability and process synchronization
+
+                    GameAction action = chooseMove();
+                    if (action != null) {
+                        game.sendAction(action); // Send the chosen move to the game
+                    }
+
+                    // End Turn
+                    Log.d("CatanSimpleAI", "Turn ends");
+                    sleep(1); // Small delay
+                    game.sendAction(new EndTurnAction(this));
+                    sleep(1); // Small delay
+                } else {
+                    Log.d("CatanSimpleAI", "Not this AI's turn");
+                }
+            } else {
+                Log.d("CatanSimpleAI", "Received GameState is the same as the current one");
+            }
+        } else {
+            Log.d("CatanSimpleAI", "Received info is not a GameState instance");
         }
-        // End Turn
-        game.sendAction(new EndTurnAction(this));
     }
+
 
     /**
      * Chooses a random move according to the game's rules. (Checks if legal or not)
@@ -178,6 +202,7 @@ public class CatanSimpleAI extends GameComputerPlayer {
 
     private boolean isConnectedToPlayerStructure(int x, int y, int playerNum) {
         // Check if the point is connected to the player's existing roads
+        Log.d("CatanSimpleAI", "isConnected Called");
         for (Road road : gameState.data[playerNum].roads) {
             if ((road.x == x && road.y == y) || (road.z == x && road.q == y)) {
                 return true;
