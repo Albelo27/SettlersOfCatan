@@ -106,10 +106,11 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerWood[k] = 0;
             data[k] = new PlayerData(); //create a new class that contains the player's roads, cards and buildings
         }
-        //TODO this the initial fixed starting position for infrastructure and should be made variable for the final game
-        playerWheat[0] = 1;
-        playerBrick[0] = 1;
-        playerWood[0] = 1;
+        playerWheat[0] = 10;
+        playerBrick[0] = 10;
+        playerWood[0] = 10;
+        playerSheep[0] = 10;
+        playerOre[0] = 10;
         playerWood[1] = 1;
         playerBrick[1] = 1;
         playerOre[1] = 1;

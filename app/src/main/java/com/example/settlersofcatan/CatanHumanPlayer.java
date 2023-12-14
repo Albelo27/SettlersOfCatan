@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.example.actions.BuildAction;
 import com.example.actions.BuyDCAction;
 import com.example.actions.DiscardAction;
+import com.example.actions.PlayDCAction;
 import com.example.actions.RollDiceAction;
 import com.example.game.GameFramework.GameMainActivity;
 import com.example.game.GameFramework.actionMessage.EndTurnAction;
@@ -39,7 +41,7 @@ import java.util.ArrayList;
  *
  * @version October 30th 2023
  */
-public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickListener, View.OnTouchListener {
+public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickListener, View.OnTouchListener, AdapterView.OnItemSelectedListener {
 
     //current android activity for GUI integration etc.
     private GameMainActivity theActivity;
@@ -55,9 +57,12 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     6 selecting a resource for DC
     7 rolled a 7 (Oh no!!)
     8 maritime trade
+    9 maritime trade 2
+    10 DevCard resource selection
     more coming soon with more functionality in the beta release
      */
     private int classState = 0;
+    private Integer selectedDC = -1;
     private String state = "";
     private Button tradeButton;
     private Button rollButton;
@@ -74,6 +79,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     private Button sheepText;
     private Button woodText;
     private Button brickText;
+    private Button playDCButton;
     private TextView p1vp;
     private TextView p1KC;
     private TextView p2vp;
@@ -125,6 +131,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         }
         if (view != null) {
             view.setGameState(gameState);
+            spinnerAdapter.notifyDataSetChanged();
             updateUI();
             view.invalidate();
         }
@@ -161,6 +168,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         brickText = theActivity.findViewById(R.id.brickButton);
         woodText = theActivity.findViewById(R.id.woodButton);
         dcSpinner = theActivity.findViewById(R.id.devCardSpinner);
+        playDCButton = theActivity.findViewById(R.id.dcPlayButton);
         tradeButton.setOnClickListener(this);
         rollButton.setOnClickListener(this);
         endTurnButton.setOnClickListener(this);
@@ -173,9 +181,11 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         sheepText.setOnClickListener(this);
         brickText.setOnClickListener(this);
         woodText.setOnClickListener(this);
-        spinnerAdapter = new ArrayAdapter<String>(theActivity.getApplicationContext(), R.layout.activity_main, spinnerList);
-        spinnerAdapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
+        playDCButton.setOnClickListener(this);
+        spinnerAdapter = new ArrayAdapter<String>(theActivity.getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, spinnerList);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);//com.google.android.material.R.layout.support_simple_spinner_dropdown_item);
         dcSpinner.setAdapter(spinnerAdapter);
+        dcSpinner.setOnItemSelectedListener(this);//TODO move this
         view.invalidate();//double check the GUI is gonna innit correctly
     }//setAsGui
 
@@ -216,6 +226,21 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
             }
         } else if (view.equals(dcButton)) {//purchase Development Card
             game.sendAction(new BuyDCAction(this));
+        } else if (view.equals(playDCButton)) {
+            switch(selectedDC) {
+                case -1://no card selected
+                    return;
+                case 0://year of plenty
+                case 3: //monopoly
+                    classState = 10; break;
+                case 1://knight
+                    game.sendAction(new PlayDCAction(this, 1)); break;
+                case 2://road builder, only builds one road
+                    classState = 3;
+                    game.sendAction(new PlayDCAction(this, 2)); break;
+                case 4://victory point, does not increase your score when played just stays in your hand
+                break;
+            }
         }
         if (classState == 7) {
             if (view.equals(oreText)) {
@@ -264,6 +289,23 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 getGameState().setPlayerBrick(getGameState().playerBrick[playerNum]+1, playerNum);
                 classState = 0;
             }
+        } else if (classState == 10) {
+            if (view.equals(oreText)) {
+                game.sendAction(new PlayDCAction(this, selectedDC, 0));
+                classState = 0;
+            } else if (view.equals(wheatText)) {
+                game.sendAction(new PlayDCAction(this, selectedDC, 1));
+                classState = 0;
+            }else if (view.equals(sheepText)) {
+                game.sendAction(new PlayDCAction(this, selectedDC, 3));
+                classState = 0;
+            }else if (view.equals(woodText)) {
+                game.sendAction(new PlayDCAction(this, selectedDC, 4));
+                classState = 0;
+            }else if (view.equals(brickText)) {
+                game.sendAction(new PlayDCAction(this, selectedDC, 2));
+                classState = 0;
+            }
         }
         updateUI();
     }//onclick
@@ -281,7 +323,7 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
                 yPos = vl[l+1];
             }
         }
-        for (int q = 0; q < c.vertexList.length; q++) {
+        for (int q = 0; q < c.vertexList.length; q++) { //if the coordinates for the click are actually a coordinate pair in the list
             if (xPos == c.vertexList[q] && yPos == c.vertexList[q + 1]) {
                 goodClick = true;
                 break;
@@ -310,7 +352,6 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     }//onTouch
 
     public void updateUI() {
-        //TODO make the full 4-person UI update properly
         updateTxt.setText(gameState.getLastMsg());
         String ore = "Ore: " + gameState.playerOre[playerNum];
         oreText.setText(ore);
@@ -600,4 +641,10 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
     }
     public void setClassState (int newState) {classState = newState;}
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {}
 }//end of class
