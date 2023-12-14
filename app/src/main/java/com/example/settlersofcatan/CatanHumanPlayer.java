@@ -168,7 +168,6 @@ public class CatanHumanPlayer extends GameHumanPlayer implements View.OnClickLis
         brickText = theActivity.findViewById(R.id.brickButton);
         woodText = theActivity.findViewById(R.id.woodButton);
         dcSpinner = theActivity.findViewById(R.id.devCardSpinner);
-        playDCButton = theActivity.findViewById(R.id.dcPlayButton);
         tradeButton.setOnClickListener(this);
         rollButton.setOnClickListener(this);
         endTurnButton.setOnClickListener(this);
