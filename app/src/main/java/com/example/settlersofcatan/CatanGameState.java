@@ -106,7 +106,6 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
             playerWood[k] = 0;
             data[k] = new PlayerData(); //create a new class that contains the player's roads, cards and buildings
         }
-        //TODO this the initial fixed starting position for infrastructure and should be made variable for the final game
         playerWheat[0] = 1;
         playerBrick[0] = 1;
         playerWood[0] = 1;
@@ -116,7 +115,6 @@ public class CatanGameState extends com.example.game.GameFramework.infoMessage.G
         data[0].buildings.add(new Building("settlement", c.X[3], c.Y[4], findAdjacent(c.X[3], c.Y[4])));
         data[0].buildings.add(new Building("settlement", c.X[8], c.Y[6], findAdjacent(c.X[8], c.Y[6])));
         data[0].roads.add(new Road(c.X[8], c.Y[6], c.X[8], c.Y[5]));
-        data[0].roads.add(new Road(c.X[7], c.Y[4], c.X[8], c.Y[5]));
         data[0].roads.add(new Road(c.X[3], c.Y[4], c.X[2], c.Y[5]));
         data[1].buildings.add(new Building("settlement", c.X[3], c.Y[8], findAdjacent(c.X[3], c.Y[8])));
         data[1].buildings.add(new Building("settlement", c.X[7], c.Y[8], findAdjacent(c.X[7], c.Y[8])));
